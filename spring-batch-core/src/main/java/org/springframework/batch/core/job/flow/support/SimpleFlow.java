@@ -36,6 +36,7 @@ import org.springframework.batch.core.job.flow.FlowExecutionException;
 import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.FlowExecutor;
 import org.springframework.batch.core.job.flow.State;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -174,15 +175,28 @@ public class SimpleFlow implements Flow, InitializingBean {
 	}
 
 	private boolean isFlowContinued(State state, FlowExecutionStatus status, StepExecution stepExecution) {
-		boolean continued = true;
 
-		continued = state != null && status!=FlowExecutionStatus.STOPPED;
+		boolean continued = state != null && status!=FlowExecutionStatus.STOPPED;
 
 		if(stepExecution != null) {
-			Boolean reRun = (Boolean) stepExecution.getExecutionContext().get("batch.restart");
+			ExecutionContext executionContext = stepExecution.getExecutionContext();
 
-			if(reRun != null && reRun && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
+			boolean reRun = false;
+
+			if(executionContext.containsKey("batch.restart")) {
+				reRun = (Boolean) executionContext.get("batch.restart");
+			}
+
+			if(reRun && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
 				continued = true;
+				System.err.println(">>> We're doing the override with the following info:");
+				System.err.println("rerun = " + reRun);
+				System.err.println("state = " + state);
+				System.err.println("status = " + status);
+				System.err.println("execution = " + stepExecution);
+				System.err.println("step name = " + stepExecution.getStepName());
+				System.err.println("executionContext = " + executionContext);
+				System.err.println("continued = " + continued);
 			}
 		}
 

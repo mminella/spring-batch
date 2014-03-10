@@ -46,13 +46,6 @@ public class RestartInPriorStepTests {
 	@Autowired
 	private Job job;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-	}
-
 	@Test
 	public void test() throws Exception {
 		//
