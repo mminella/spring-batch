@@ -52,7 +52,9 @@
 		</step>
 		<step id="step2">
 			<tasklet ref="decidingTasklet"/>
+            <!-- Second Run -->
 			<next on="ES3" to="step3"/>
+            <!-- First Run -->
 			<stop on="ES4" restart="step4"/>
 		</step>
 		<step id="step3" next="step4">

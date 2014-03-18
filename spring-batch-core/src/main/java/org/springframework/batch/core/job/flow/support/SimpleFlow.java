@@ -15,19 +15,8 @@
  */
 package org.springframework.batch.core.job.flow.support;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.job.flow.Flow;
@@ -38,6 +27,16 @@ import org.springframework.batch.core.job.flow.FlowExecutor;
 import org.springframework.batch.core.job.flow.State;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A {@link Flow} that branches conditionally depending on the exit status of
@@ -179,23 +178,32 @@ public class SimpleFlow implements Flow, InitializingBean {
 		boolean continued = state != null && status!=FlowExecutionStatus.STOPPED;
 
 		if(stepExecution != null) {
-			ExecutionContext executionContext = stepExecution.getExecutionContext();
+			ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
+			ExecutionContext stepExecutionContext = stepExecution.getExecutionContext();
+
+			boolean stepExecuted = false;
+
+			if(stepExecutionContext.containsKey("batch.executed")) {
+				stepExecuted = (Boolean) stepExecutionContext.get("batch.executed");
+			}
 
 			boolean reRun = false;
 
-			if(executionContext.containsKey("batch.restart")) {
-				reRun = (Boolean) executionContext.get("batch.restart");
+			String restartKey = String.format("batch.restart.%s", stepExecution.getStepName());
+			if(jobExecutionContext.containsKey(restartKey)) {
+				reRun = (Boolean) jobExecutionContext.get(restartKey);
 			}
 
-			if(reRun && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
+			if(reRun && stepExecuted && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
 				continued = true;
+				jobExecutionContext.remove(restartKey);
 				System.err.println(">>> We're doing the override with the following info:");
 				System.err.println("rerun = " + reRun);
 				System.err.println("state = " + state);
 				System.err.println("status = " + status);
 				System.err.println("execution = " + stepExecution);
 				System.err.println("step name = " + stepExecution.getStepName());
-				System.err.println("executionContext = " + executionContext);
+				System.err.println("executionContext = " + jobExecutionContext);
 				System.err.println("continued = " + continued);
 			}
 		}
@@ -203,9 +211,59 @@ public class SimpleFlow implements Flow, InitializingBean {
 		return continued;
 	}
 
+	private State findState(String stateName, FlowExecutionStatus status, StepExecution stepExecution) throws FlowExecutionException {
+		Set<StateTransition> set = transitionMap.get(stateName);
+
+		if (set == null) {
+			throw new FlowExecutionException(String.format("No transitions found in flow=%s for state=%s", getName(),
+																  stateName));
+		}
+
+		String next = null;
+		String exitCode = status.getName();
+		for (StateTransition stateTransition : set) {
+			if (stateTransition.matches(exitCode)) {
+				if (stateTransition.isEnd()) {
+					// End of job
+					return null;
+				}
+				next = stateTransition.getNext();
+				break;
+			}
+		}
+
+		if (next == null) {
+			if(stepExecution != null) {
+				exitCode = stepExecution.getStatus().toString();
+
+				for (StateTransition stateTransition : set) {
+					if (stateTransition.matches(exitCode)) {
+						if (stateTransition.isEnd()) {
+							// End of job
+							return null;
+						}
+						next = stateTransition.getNext();
+						break;
+					}
+				}
+			}
+
+			if(next == null) {
+				throw new FlowExecutionException(String.format("Next state not found in flow=%s for state=%s with exit status=%s", getName(), stateName, status.getName()));
+			}
+		}
+
+		if (!stateMap.containsKey(next)) {
+			throw new FlowExecutionException(String.format("Next state not specified in flow=%s for next=%s",
+																  getName(), next));
+		}
+
+		return stateMap.get(next);
+	}
+
 	/**
 	 * @return the next {@link Step} (or null if this is the end)
-	 * @throws JobExecutionException
+	 * @throws FlowExecutionException
 	 */
 	private State nextState(String stateName, FlowExecutionStatus status) throws FlowExecutionException {
 
@@ -219,7 +277,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 		String next = null;
 		String exitCode = status.getName();
 		for (StateTransition stateTransition : set) {
-			if (stateTransition.matches(exitCode) || (exitCode.equals("PENDING") && stateTransition.matches("STOPPED"))) {
+			if (stateTransition.matches(exitCode)) {
 				if (stateTransition.isEnd()) {
 					// End of job
 					return null;
@@ -239,10 +297,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 					getName(), next));
 		}
 
-		State state = stateMap.get(next);
-
-		return state;
-
+		return stateMap.get(next);
 	}
 
 	/**
