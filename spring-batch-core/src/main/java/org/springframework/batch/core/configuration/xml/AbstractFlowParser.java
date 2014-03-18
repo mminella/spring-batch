@@ -367,9 +367,6 @@ public abstract class AbstractFlowParser extends AbstractSingleBeanDefinitionPar
 
 			endBuilder.addConstructorArgValue(abandon);
 
-			//TODO: Need to change this to be whatever the bean name is if a custom jobRepository has been configured
-			endBuilder.addConstructorArgReference("jobRepository");
-
 			String nextOnEnd = exitCodeExists ? null : next;
 			endState = getStateTransitionReference(parserContext, endBuilder.getBeanDefinition(), null, nextOnEnd);
 			next = endName;
