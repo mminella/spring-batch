@@ -27,6 +27,7 @@ import org.springframework.batch.core.job.flow.FlowExecutor;
 import org.springframework.batch.core.job.flow.State;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -164,7 +165,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 
 			logger.debug("Completed state="+stateName+" with status="+status);
 
-			state = nextState(stateName, status);
+			state = nextState(stateName, status, stepExecution);
 		}
 
 		FlowExecution result = new FlowExecution(stateName, status);
@@ -174,41 +175,22 @@ public class SimpleFlow implements Flow, InitializingBean {
 	}
 
 	private boolean isFlowContinued(State state, FlowExecutionStatus status, StepExecution stepExecution) {
-
 		boolean continued = state != null && status!=FlowExecutionStatus.STOPPED;
 
 		if(stepExecution != null) {
-			ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
-			ExecutionContext stepExecutionContext = stepExecution.getExecutionContext();
+			Boolean reRun = (Boolean) stepExecution.getExecutionContext().get("batch.restart");
+			Boolean executed = (Boolean) stepExecution.getExecutionContext().get("batch.executed");
 
-			boolean stepExecuted = false;
-
-			if(stepExecutionContext.containsKey("batch.executed")) {
-				stepExecuted = (Boolean) stepExecutionContext.get("batch.executed");
-			}
-
-			boolean reRun = false;
-
-			String restartKey = String.format("batch.restart.%s", stepExecution.getStepName());
-			if(jobExecutionContext.containsKey(restartKey)) {
-				reRun = (Boolean) jobExecutionContext.get(restartKey);
-			}
-
-			if(reRun && stepExecuted && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
+			if((executed == null || !executed.booleanValue()) && reRun != null && reRun && status == FlowExecutionStatus.STOPPED && stateNameEndsWithStepName(state, stepExecution)) {
 				continued = true;
-				jobExecutionContext.remove(restartKey);
-				System.err.println(">>> We're doing the override with the following info:");
-				System.err.println("rerun = " + reRun);
-				System.err.println("state = " + state);
-				System.err.println("status = " + status);
-				System.err.println("execution = " + stepExecution);
-				System.err.println("step name = " + stepExecution.getStepName());
-				System.err.println("executionContext = " + jobExecutionContext);
-				System.err.println("continued = " + continued);
 			}
 		}
 
 		return continued;
+	}
+
+	private boolean stateNameEndsWithStepName(State state, StepExecution stepExecution) {
+		return !(stepExecution == null || state == null) && !state.getName().endsWith(stepExecution.getStepName());
 	}
 
 	private State findState(String stateName, FlowExecutionStatus status, StepExecution stepExecution) throws FlowExecutionException {
@@ -265,39 +247,23 @@ public class SimpleFlow implements Flow, InitializingBean {
 	 * @return the next {@link Step} (or null if this is the end)
 	 * @throws FlowExecutionException
 	 */
-	private State nextState(String stateName, FlowExecutionStatus status) throws FlowExecutionException {
+	private State nextState(String stateName, FlowExecutionStatus status, StepExecution stepExecution) throws FlowExecutionException {
+		State nextState = findState(stateName, status, stepExecution);
 
-		Set<StateTransition> set = transitionMap.get(stateName);
+		if(stepExecution != null) {
+			ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
+			if(executionContext.containsKey("batch.stoppedStep")) {
+				String stepName = executionContext.getString("batch.stoppedStep");
 
-		if (set == null) {
-			throw new FlowExecutionException(String.format("No transitions found in flow=%s for state=%s", getName(),
-					stateName));
-		}
-
-		String next = null;
-		String exitCode = status.getName();
-		for (StateTransition stateTransition : set) {
-			if (stateTransition.matches(exitCode)) {
-				if (stateTransition.isEnd()) {
-					// End of job
-					return null;
+				if(stateName.endsWith(stepName)) {
+					if(nextState != null && executionContext.containsKey("batch.restartStep") && StringUtils.hasText(executionContext.getString("batch.restartStep"))) {
+						nextState = findState(stateName, new FlowExecutionStatus(status.getName() + ".RESTART"), stepExecution);
+					}
 				}
-				next = stateTransition.getNext();
-				break;
 			}
 		}
 
-		if (next == null) {
-			throw new FlowExecutionException(String.format(
-					"Next state not found in flow=%s for state=%s with exit status=%s", getName(), stateName, status.getName()));
-		}
-
-		if (!stateMap.containsKey(next)) {
-			throw new FlowExecutionException(String.format("Next state not specified in flow=%s for next=%s",
-					getName(), next));
-		}
-
-		return stateMap.get(next);
+		return nextState;
 	}
 
 	/**

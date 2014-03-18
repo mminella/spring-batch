@@ -125,6 +125,10 @@ public class SimpleStepHandler implements StepHandler, InitializingBean {
 
 			if (isRestart) {
 				currentStepExecution.setExecutionContext(lastStepExecution.getExecutionContext());
+
+				if(lastStepExecution.getExecutionContext().containsKey("batch.executed")) {
+					currentStepExecution.getExecutionContext().remove("batch.executed");
+				}
 			}
 			else {
 				currentStepExecution.setExecutionContext(new ExecutionContext(executionContext));
@@ -135,6 +139,7 @@ public class SimpleStepHandler implements StepHandler, InitializingBean {
 			logger.info("Executing step: [" + step.getName() + "]");
 			try {
 				step.execute(currentStepExecution);
+				currentStepExecution.getExecutionContext().put("batch.executed", true);
 			}
 			catch (JobInterruptedException e) {
 				// Ensure that the job gets the message that it is stopping
@@ -153,9 +158,6 @@ public class SimpleStepHandler implements StepHandler, InitializingBean {
 				throw new JobInterruptedException("Job interrupted by step execution");
 			}
 
-		}
-		else {
-			// currentStepExecution.setExitStatus(ExitStatus.NOOP);
 		}
 
 		return currentStepExecution;
