@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by "Michael Minella" on 3/7/14.
+ * @author Michael Minella
  */
 @ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -48,17 +48,11 @@ public class RestartLoopTests {
 	@Test
 	public void test() throws Exception {
 		// Run 1
-		System.err.println("************************************************");
-		System.err.println("              RUN 1");
-		System.err.println("************************************************");
 		JobExecution jobExecution1 = jobLauncher.run(job, new JobParameters());
 
 		assertEquals(BatchStatus.STOPPED, jobExecution1.getStatus());
 
 		// Run 2
-		System.err.println("************************************************");
-		System.err.println("              RUN 2");
-		System.err.println("************************************************");
 		JobExecution jobExecution2 = jobLauncher.run(job, new JobParameters());
 
 		assertEquals(BatchStatus.STOPPED, jobExecution2.getStatus());

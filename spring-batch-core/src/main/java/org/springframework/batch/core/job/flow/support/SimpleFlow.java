@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2013 the original author or authors.
+ * Copyright 2006-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.springframework.batch.core.job.flow.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.job.flow.Flow;
@@ -182,7 +181,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 			Boolean reRun = (Boolean) stepExecution.getExecutionContext().get("batch.restart");
 			Boolean executed = (Boolean) stepExecution.getExecutionContext().get("batch.executed");
 
-			if((executed == null || !executed.booleanValue()) && reRun != null && reRun && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
+			if((executed == null || !executed) && reRun != null && reRun && status == FlowExecutionStatus.STOPPED && !state.getName().endsWith(stepExecution.getStepName())) {
 				continued = true;
 			}
 		}
@@ -192,7 +191,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 
 	/**
 	 * @return the next {@link Step} (or null if this is the end)
-	 * @throws JobExecutionException
+	 * @throws org.springframework.batch.core.job.flow.FlowExecutionException
 	 */
 	private State nextState(String stateName, FlowExecutionStatus status) throws FlowExecutionException {
 
@@ -225,9 +224,7 @@ public class SimpleFlow implements Flow, InitializingBean {
 																  getName(), next));
 		}
 
-		State state = stateMap.get(next);
-
-		return state;
+		return stateMap.get(next);
 
 	}
 
