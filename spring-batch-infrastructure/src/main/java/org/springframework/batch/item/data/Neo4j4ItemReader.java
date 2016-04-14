@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,16 @@ package org.springframework.batch.item.data;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.data.neo4j.conversion.DefaultConverter;
-import org.springframework.data.neo4j.conversion.Result;
-import org.springframework.data.neo4j.conversion.ResultConverter;
-import org.springframework.data.neo4j.template.Neo4jOperations;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * <p>
  * Restartable {@link ItemReader} that reads objects from the graph database Neo4j
- * via a paging technique.
+ * via a paging technique using the APIs availble for Neo4J 4+.
  * </p>
  *
  * <p>
@@ -60,40 +52,20 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Michael Minella
- *
+ * @author Vince Bickers
+ * @since 3.0.7
  */
-public class Neo4jItemReader<T> extends AbstractNeo4jItemReader {
+public class Neo4j4ItemReader<T> extends AbstractNeo4jItemReader {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private ResultConverter<Map<String, Object>, T> resultConverter;
-
-	public Neo4jItemReader() {
-		setName(ClassUtils.getShortName(Neo4jItemReader.class));
-	}
-
-	/**
-	 * Set the converter used to convert node to the targetType.  By
-	 * default, {@link DefaultConverter} is used.
-	 *
-	 * @param resultConverter the converter to use.
-	 */
-	public void setResultConverter(ResultConverter<Map<String, Object>, T> resultConverter) {
-		this.resultConverter = resultConverter;
-	}
-
 	@Override
 	protected Iterator<T> doPageRead() {
-		Result<Map<String, Object>> queryResults = getTemplate().query(
-				generateLimitCypherQuery(), parameterValues);
+		Iterable queryResults = getTemplate().queryForObjects(
+				getTargetType(), generateLimitCypherQuery(), getParameterValues());
 
 		if(queryResults != null) {
-			if (resultConverter != null) {
-				return queryResults.to(getTargetType(), resultConverter).iterator();
-			}
-			else {
-				return queryResults.to(getTargetType()).iterator();
-			}
+			return queryResults.iterator();
 		}
 		else {
 			return new ArrayList<T>().iterator();

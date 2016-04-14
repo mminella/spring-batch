@@ -50,6 +50,7 @@ allprojects {
 		springDataJpaVersion = '1.6.0.RELEASE'
 		springDataMongodbVersion = '1.5.0.RELEASE'
 		springDataNeo4jVersion = '3.1.0.RELEASE'
+		springDataNeo4j4Version = '4.1.1.RELEASE'
 		springIntegrationVersion = '4.0.1.RELEASE'
 		springLdapVersion = '2.0.2.RELEASE'
 
@@ -269,7 +270,24 @@ project('spring-batch-core') {
 
 project('spring-batch-infrastructure') {
     description = 'Spring Batch Infrastructure'
+
+	sourceSets{
+		main {
+			java {
+				srcDir 'src/main/java/'
+				exclude '**/Neo4jItemReader**'
+			}
+		}
+		test {
+			java {
+				srcDir 'src/main/java/'
+				exclude '**/Neo4jItem**'
+			}
+		}
+	}
+
 	test {
+		sourceSet
 		// permsize settings not passed down from GRADLE_OPTS nor JAVA_OPTS
 		// when running certain tests causing permgen OOM when using JDK7
 		// compilation is not performed with JDK6 and permgen is removed
@@ -336,6 +354,7 @@ project('spring-batch-infrastructure') {
 		optional "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
 		optional "org.springframework.data:spring-data-mongodb:$springDataMongodbVersion"
 		optional "org.springframework.data:spring-data-neo4j:$springDataNeo4jVersion"
+		optional "org.springframework.data:spring-data-neo4j:$springDataNeo4j4Version"
 		optional "org.springframework.data:spring-data-gemfire:$springDataGemfireVersion"
 		compile("org.codehaus.woodstox:woodstox-core-asl:$woodstoxVersion") { dep ->
 			optional dep
