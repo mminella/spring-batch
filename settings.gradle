@@ -8,3 +8,6 @@ include 'spring-batch-infrastructure-tests'
 include 'spring-batch-test'
 include 'spring-batch-integration'
 include 'spring-batch-samples'
+
+include "buildSrc"
+rootProject.children.find{ it.name == "buildSrc" }.name = "spring-build-src"

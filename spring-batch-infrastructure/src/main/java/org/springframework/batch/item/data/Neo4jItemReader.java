@@ -22,15 +22,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.neo4j.conversion.DefaultConverter;
 import org.springframework.data.neo4j.conversion.Result;
 import org.springframework.data.neo4j.conversion.ResultConverter;
-import org.springframework.data.neo4j.template.Neo4jOperations;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -85,7 +82,7 @@ public class Neo4jItemReader<T> extends AbstractNeo4jItemReader {
 	@Override
 	protected Iterator<T> doPageRead() {
 		Result<Map<String, Object>> queryResults = getTemplate().query(
-				generateLimitCypherQuery(), parameterValues);
+				generateLimitCypherQuery(), getParameterValues());
 
 		if(queryResults != null) {
 			if (resultConverter != null) {
