@@ -8,8 +8,8 @@ buildscript {
 		maven { url 'https://repo.spring.io/plugins-release' }
 	}
 	dependencies {
-		classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.2.8'
-		classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.5'
+		classpath 'io.spring.gradle:docbook-reference-plugin:0.3.1'
+		classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
 		classpath 'io.spring.gradle:spring-io-plugin:0.0.5.RELEASE'
 	}
 }
@@ -278,7 +278,7 @@ project('spring-batch-core') {
 		optional "org.slf4j:slf4j-log4j12:$slf4jVersion"
 		optional "log4j:log4j:$log4jVersion"
 
-//		provided "javax.batch:javax.batch-api:$javaxBatchApiVersion"
+		optional "javax.batch:javax.batch-api:$javaxBatchApiVersion"
 	}
 }
 
@@ -369,7 +369,7 @@ project('spring-batch-infrastructure-neo4j4') {
 	merge.into = project(':spring-batch-infrastructure')
 
 	dependencies {
-		compile project(":spring-batch-infrastructure")
+//		compile project(":spring-batch-infrastructure")
 		optional "org.springframework.data:spring-data-neo4j:$springDataNeo4j4Version"
 		testCompile "org.mockito:mockito-core:$mockitoVersion"
 		testCompile "junit:junit:${junitVersion}"
@@ -531,6 +531,8 @@ project('spring-batch-integration') {
 		optional "log4j:log4j:1.2.14"
 		optional "org.springframework.integration:spring-integration-jms:$springIntegrationVersion"
 		optional "org.springframework:spring-jms:$springVersion"
+
+		optional "javax.batch:javax.batch-api:$javaxBatchApiVersion"
 	}
 }
 
@@ -585,10 +587,10 @@ project('spring-batch-samples') {
 
 		testRuntime "com.sun.mail:javax.mail:$javaMailVersion"
 
-//		provided "mysql:mysql-connector-java:$mysqlVersion"
-//		provided "net.sourceforge.jtds:jtds:$jtdsVersion"
-//		provided "com.h2database:h2:$h2databaseVersion"
-//		provided "javax.servlet:javax.servlet-api:$servletApiVersion"
+		provided "mysql:mysql-connector-java:$mysqlVersion"
+		provided "net.sourceforge.jtds:jtds:$jtdsVersion"
+		provided "com.h2database:h2:$h2databaseVersion"
+		provided "javax.servlet:javax.servlet-api:$servletApiVersion"
 
 		optional "com.vmware.sqlfire:sqlfireclient:$sqlfireclientVersion"
 		optional "org.slf4j:slf4j-log4j12:$slf4jVersion"
@@ -600,6 +602,7 @@ project('spring-batch-samples') {
 		optional "org.springframework.amqp:spring-rabbit:$springAmqpVersion"
         optional "javax.inject:javax.inject:1"
 
+		optional "javax.batch:javax.batch-api:$javaxBatchApiVersion"
 	}
 }
 
@@ -820,5 +823,5 @@ or specify the Gradle property `TCK_HOME`, e.g: ./gradlew runTck -PTCK_HOME=/pat
 
 task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '1.11'
+	gradleVersion = '2.4'
 }
