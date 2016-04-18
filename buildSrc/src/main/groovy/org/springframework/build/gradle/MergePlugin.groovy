@@ -141,7 +141,7 @@ class MergePlugin implements Plugin<Project> {
 	}
 
 	private postProcessProjects(Gradle gradle) {
-		gradle.allprojects(new Action<Project>() {
+		gradle.rootProject.subprojects(new Action<Project>() {
 			public void execute(Project project) {
 				project.configurations.getByName("runtime").allDependencies.withType(ProjectDependency).each{
 					Configuration dependsOnMergedFrom = it.dependencyProject.configurations.getByName("merging");
