@@ -31,7 +31,7 @@ import org.springframework.util.ClassUtils;
 /**
  * <p>
  * Extensions of the {@link AbstractNeo4jItemReader} intended for use with versions of
- * Spring Data Neo4J < 4.  Conversions of the results are done using an external
+ * Spring Data Neo4J &lt; 4.  Conversions of the results are done using an external
  * {@link ResultConverter}.
  * </p>
  *

@@ -22,7 +22,7 @@ import java.util.Iterator;
 /**
  * <p>
  * Extensions of the {@link AbstractNeo4jItemReader} intended for use with versions of
- * Spring Data Neo4J < 4.  Conversions of the results are done using logic based on the
+ * Spring Data Neo4J &gt; 4.  Conversions of the results are done using logic based on the
  * target type.
  * </p>
  *
