@@ -96,7 +96,6 @@ allprojects {
 }
 
 configure(subprojects - project(":spring-build-src")) { subproject ->
-//subprojects { subproject ->
 
 	apply plugin: 'java'
 	apply from:   "${rootProject.projectDir}/publish-maven.gradle"
@@ -369,7 +368,6 @@ project('spring-batch-infrastructure-neo4j4') {
 	merge.into = project(':spring-batch-infrastructure')
 
 	dependencies {
-//		compile project(":spring-batch-infrastructure")
 		optional "org.springframework.data:spring-data-neo4j:$springDataNeo4j4Version"
 		testCompile "org.mockito:mockito-core:$mockitoVersion"
 		testCompile "junit:junit:${junitVersion}"
@@ -609,7 +607,6 @@ project('spring-batch-samples') {
 apply plugin: 'docbook-reference'
 
 reference {
-	//sourceDir = file('src/reference/docbook')
 	sourceDir = file('src/site/docbook/reference')
 }
 

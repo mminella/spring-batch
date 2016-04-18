@@ -19,36 +19,11 @@ package org.springframework.batch.item.data;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.batch.item.ItemReader;
-
 /**
  * <p>
- * Restartable {@link ItemReader} that reads objects from the graph database Neo4j
- * via a paging technique using the APIs availble for Neo4J 4+.
- * </p>
- *
- * <p>
- * It executes cypher queries built from the statement fragments provided to
- * retrieve the requested data.  The query is executed using paged requests of
- * a size specified in {@link #setPageSize(int)}.  Additional pages are requested
- * as needed when the {@link #read()} method is called.  On restart, the reader
- * will begin again at the same number item it left off at.
- * </p>
- *
- * <p>
- * Performance is dependent on your Neo4J configuration (embedded or remote) as
- * well as page size.  Setting a fairly large page size and using a commit
- * interval that matches the page size should provide better performance.
- * </p>
- *
- * <p>
- * This implementation is thread-safe between calls to
- * {@link #open(org.springframework.batch.item.ExecutionContext)}, however you
- * should set <code>saveState=false</code> if used in a multi-threaded
- * environment (no restart available).
+ * Extensions of the {@link AbstractNeo4jItemReader} intended for use with versions of
+ * Spring Data Neo4J < 4.  Conversions of the results are done using logic based on the
+ * target type.
  * </p>
  *
  * @author Michael Minella
@@ -56,8 +31,6 @@ import org.springframework.batch.item.ItemReader;
  * @since 3.0.7
  */
 public class Neo4j4ItemReader<T> extends AbstractNeo4jItemReader {
-
-	protected Log logger = LogFactory.getLog(getClass());
 
 	@Override
 	protected Iterator<T> doPageRead() {
