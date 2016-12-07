@@ -299,6 +299,9 @@ project('spring-batch-core') {
 project('spring-batch-infrastructure') {
     description = 'Spring Batch Infrastructure'
 	test {
+		testLogging {
+			showStandardStreams = true
+		}
 		// permsize settings not passed down from GRADLE_OPTS nor JAVA_OPTS
 		// when running certain tests causing permgen OOM when using JDK7
 		// compilation is not performed with JDK6 and permgen is removed

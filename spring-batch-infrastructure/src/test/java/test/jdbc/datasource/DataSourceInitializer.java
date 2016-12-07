@@ -119,10 +119,10 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	private void initialize() {
-		logger.debug("initializing the database");
+		System.out.println("initializing the database");
 		if (!initialized) {
 			doDestroy();
-			logger.debug("doDestroy complete");
+			System.out.println("doDestroy complete");
 			if (initScripts != null) {
 				for (int i = 0; i < initScripts.length; i++) {
 					Resource initScript = initScripts[i];
@@ -138,7 +138,7 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 			return;
 
 		try {
-			logger.debug("About to run script -> " + scriptResource.getURL());
+			System.out.println("About to run script -> " + scriptResource.getURL());
 		}
 		catch (IOException e) {
 			throw new RuntimeException("logging message failed: " + e.getMessage(), e);
