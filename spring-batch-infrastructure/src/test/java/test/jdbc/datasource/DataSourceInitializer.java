@@ -16,9 +16,14 @@
 
 package test.jdbc.datasource;
 
+import java.io.IOException;
+import java.util.List;
+import javax.sql.DataSource;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,10 +38,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Wrapper for a {@link DataSource} that can run scripts on start up and shut
@@ -118,8 +119,10 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	private void initialize() {
+		logger.debug("initializing the database");
 		if (!initialized) {
 			doDestroy();
+			logger.debug("doDestroy complete");
 			if (initScripts != null) {
 				for (int i = 0; i < initScripts.length; i++) {
 					Resource initScript = initScripts[i];
@@ -133,6 +136,13 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	private void doExecuteScript(final Resource scriptResource) {
 		if (scriptResource == null || !scriptResource.exists())
 			return;
+
+		try {
+			logger.debug("About to run script -> " + scriptResource.getURL());
+		}
+		catch (IOException e) {
+			throw new RuntimeException("logging message failed: " + e.getMessage(), e);
+		}
 		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 		TransactionTemplate transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
