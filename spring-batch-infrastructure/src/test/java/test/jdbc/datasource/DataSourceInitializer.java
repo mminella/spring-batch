@@ -17,10 +17,6 @@
 package test.jdbc.datasource;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -191,18 +187,18 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 
 				System.out.println(">> Scripts have been run");
 
-				try {
-					Connection conn = jdbcTemplate.getDataSource().getConnection();
-					DatabaseMetaData dbmd = conn.getMetaData();
-					String[] types = {"TABLE"};
-					ResultSet rs = dbmd.getTables(null, null, "%", types);
-					while (rs.next()) {
-						System.out.println(rs.getString("TABLE_NAME"));
-					}
-				}
-				catch (SQLException e) {
-					System.out.println(">>  An error was thrown when trying to list the tables: " + e.getMessage());
-				}
+//				try {
+//					Connection conn = jdbcTemplate.getDataSource().getConnection();
+//					DatabaseMetaData dbmd = conn.getMetaData();
+//					String[] types = {"TABLE"};
+//					ResultSet rs = dbmd.getTables(null, null, "%", types);
+//					while (rs.next()) {
+//						System.out.println(rs.getString("TABLE_NAME"));
+//					}
+//				}
+//				catch (SQLException e) {
+//					System.out.println(">>  An error was thrown when trying to list the tables: " + e.getMessage());
+//				}
 
 				return null;
 			}
