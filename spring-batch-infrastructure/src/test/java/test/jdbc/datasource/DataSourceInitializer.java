@@ -119,10 +119,8 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	private void initialize() {
-		System.out.println("initializing the database");
 		if (!initialized) {
 			doDestroy();
-			System.out.println("doDestroy complete");
 			if (initScripts != null) {
 				for (int i = 0; i < initScripts.length; i++) {
 					Resource initScript = initScripts[i];
@@ -136,14 +134,6 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	private void doExecuteScript(final Resource scriptResource) {
 		if (scriptResource == null || !scriptResource.exists())
 			return;
-
-		try {
-			System.out.println("About to run script -> " + scriptResource.getURL());
-		}
-		catch (IOException e) {
-			throw new RuntimeException("logging message failed: " + e.getMessage(), e);
-		}
-
 		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 		TransactionTemplate transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
@@ -167,14 +157,6 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 							jdbcTemplate.execute(script);
 						}
 						catch (DataAccessException e) {
-							try {
-								System.out.println(">> script " + scriptResource.getURL() + " was not executed successfully");
-							}
-							catch (IOException e1) {
-								System.out.println("This isn't good: " + e1.getMessage());
-
-								throw new RuntimeException(e1);
-							}
 							if (ignoreFailedDrop && script.toLowerCase().startsWith("drop")) {
 								logger.debug("DROP script failed (ignoring): " + script);
 							}
@@ -184,22 +166,6 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 						}
 					}
 				}
-
-				System.out.println(">> Scripts have been run");
-
-//				try {
-//					Connection conn = jdbcTemplate.getDataSource().getConnection();
-//					DatabaseMetaData dbmd = conn.getMetaData();
-//					String[] types = {"TABLE"};
-//					ResultSet rs = dbmd.getTables(null, null, "%", types);
-//					while (rs.next()) {
-//						System.out.println(rs.getString("TABLE_NAME"));
-//					}
-//				}
-//				catch (SQLException e) {
-//					System.out.println(">>  An error was thrown when trying to list the tables: " + e.getMessage());
-//				}
-
 				return null;
 			}
 
