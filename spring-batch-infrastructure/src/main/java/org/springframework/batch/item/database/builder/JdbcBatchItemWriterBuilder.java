@@ -84,13 +84,13 @@ public class JdbcBatchItemWriterBuilder<T> {
 	}
 
 	public JdbcBatchItemWriterBuilder<T> columnMapped() {
-		this.mapped.flipBit(0);
+		this.mapped = this.mapped.setBit(0);
 
 		return this;
 	}
 
 	public JdbcBatchItemWriterBuilder<T> beanMapped() {
-		this.mapped.flipBit(1);
+		this.mapped = this.mapped.setBit(1);
 
 		return this;
 	}
