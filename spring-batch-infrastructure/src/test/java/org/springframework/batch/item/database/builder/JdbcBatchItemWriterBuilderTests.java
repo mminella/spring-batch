@@ -34,6 +34,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -114,6 +115,82 @@ public class JdbcBatchItemWriterBuilderTests {
 		items.add(new Foo(4, "five", "six"));
 		items.add(new Foo(7, "eight", "nine"));
 
+		writer.write(items);
+
+		verifyRow(1, "two", "three");
+		verifyRow(4, "five", "six");
+		verifyRow(7, "eight", "nine");
+	}
+
+	@Test
+	public void testCustomPreparedStatementSetter() throws Exception {
+		JdbcBatchItemWriter<Map<String, Object>> writer = new JdbcBatchItemWriterBuilder<Map<String, Object>>()
+				.itemPreparedStatementSetter((item, ps) -> {
+					ps.setInt(0, (int) item.get("first"));
+					ps.setString(1, (String) item.get("second"));
+					ps.setString(2, (String) item.get("third"));
+				})
+				.dataSource(this.dataSource)
+				.sql("INSERT INTO FOO (first, second, third) VALUES (:first, :second, :third)")
+				.build();
+
+		writer.afterPropertiesSet();
+
+		List<Map<String, Object>> items = new ArrayList<>(3);
+
+		Map<String, Object> item = new HashMap<>(3);
+		item.put("first", 1);
+		item.put("second", "two");
+		item.put("third", "three");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 4);
+		item.put("second", "five");
+		item.put("third", "six");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 7);
+		item.put("second", "eight");
+		item.put("third", "nine");
+		items.add(item);
+		writer.write(items);
+
+		verifyRow(1, "two", "three");
+		verifyRow(4, "five", "six");
+		verifyRow(7, "eight", "nine");
+	}
+
+	@Test
+	public void testCustomPSqlParameterSourceProvider() throws Exception {
+		JdbcBatchItemWriter<Map<String, Object>> writer = new JdbcBatchItemWriterBuilder<Map<String, Object>>()
+				.itemSqlParameterSourceProvider(MapSqlParameterSource::new)
+				.dataSource(this.dataSource)
+				.sql("INSERT INTO FOO (first, second, third) VALUES (:first, :second, :third)")
+				.build();
+
+		writer.afterPropertiesSet();
+
+		List<Map<String, Object>> items = new ArrayList<>(3);
+
+		Map<String, Object> item = new HashMap<>(3);
+		item.put("first", 1);
+		item.put("second", "two");
+		item.put("third", "three");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 4);
+		item.put("second", "five");
+		item.put("third", "six");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 7);
+		item.put("second", "eight");
+		item.put("third", "nine");
+		items.add(item);
 		writer.write(items);
 
 		verifyRow(1, "two", "three");
