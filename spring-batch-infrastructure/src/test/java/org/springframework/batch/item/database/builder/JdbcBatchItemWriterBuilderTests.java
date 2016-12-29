@@ -79,27 +79,13 @@ public class JdbcBatchItemWriterBuilderTests {
 
 		writer.afterPropertiesSet();
 
-		List<Map<String, Object>> items = new ArrayList<>(3);
-
-		Map<String, Object> item = new HashMap<>(3);
-		item.put("first", 1);
-		item.put("second", "two");
-		item.put("third", "three");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 4);
-		item.put("second", "five");
-		item.put("third", "six");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 7);
-		item.put("second", "eight");
-		item.put("third", "nine");
-		items.add(item);
+		List<Map<String, Object>> items = buildMapItems();
 		writer.write(items);
 
+		verifyWrite();
+	}
+
+	private void verifyWrite() {
 		verifyRow(1, "two", "three");
 		verifyRow(4, "five", "six");
 		verifyRow(7, "eight", "nine");
@@ -117,30 +103,10 @@ public class JdbcBatchItemWriterBuilderTests {
 
 		writer.afterPropertiesSet();
 
-		List<Map<String, Object>> items = new ArrayList<>(3);
-
-		Map<String, Object> item = new HashMap<>(3);
-		item.put("first", 1);
-		item.put("second", "two");
-		item.put("third", "three");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 4);
-		item.put("second", "five");
-		item.put("third", "six");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 7);
-		item.put("second", "eight");
-		item.put("third", "nine");
-		items.add(item);
+		List<Map<String, Object>> items = buildMapItems();
 		writer.write(items);
 
-		verifyRow(1, "two", "three");
-		verifyRow(4, "five", "six");
-		verifyRow(7, "eight", "nine");
+		verifyWrite();
 
 		Object usedTemplate = ReflectionTestUtils.getField(writer, "namedParameterJdbcTemplate");
 		assertTrue(template == usedTemplate);
@@ -164,9 +130,7 @@ public class JdbcBatchItemWriterBuilderTests {
 
 		writer.write(items);
 
-		verifyRow(1, "two", "three");
-		verifyRow(4, "five", "six");
-		verifyRow(7, "eight", "nine");
+		verifyWrite();
 	}
 
 	@Test(expected = EmptyResultDataAccessException.class)
@@ -201,30 +165,10 @@ public class JdbcBatchItemWriterBuilderTests {
 
 		writer.afterPropertiesSet();
 
-		List<Map<String, Object>> items = new ArrayList<>(3);
-
-		Map<String, Object> item = new HashMap<>(3);
-		item.put("first", 1);
-		item.put("second", "two");
-		item.put("third", "three");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 4);
-		item.put("second", "five");
-		item.put("third", "six");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 7);
-		item.put("second", "eight");
-		item.put("third", "nine");
-		items.add(item);
+		List<Map<String, Object>> items = buildMapItems();
 		writer.write(items);
 
-		verifyRow(1, "two", "three");
-		verifyRow(4, "five", "six");
-		verifyRow(7, "eight", "nine");
+		verifyWrite();
 	}
 
 	@Test
@@ -237,30 +181,10 @@ public class JdbcBatchItemWriterBuilderTests {
 
 		writer.afterPropertiesSet();
 
-		List<Map<String, Object>> items = new ArrayList<>(3);
-
-		Map<String, Object> item = new HashMap<>(3);
-		item.put("first", 1);
-		item.put("second", "two");
-		item.put("third", "three");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 4);
-		item.put("second", "five");
-		item.put("third", "six");
-		items.add(item);
-
-		item = new HashMap<>(3);
-		item.put("first", 7);
-		item.put("second", "eight");
-		item.put("third", "nine");
-		items.add(item);
+		List<Map<String, Object>> items = buildMapItems();
 		writer.write(items);
 
-		verifyRow(1, "two", "three");
-		verifyRow(4, "five", "six");
-		verifyRow(7, "eight", "nine");
+		verifyWrite();
 	}
 
 	@Test
@@ -309,6 +233,29 @@ public class JdbcBatchItemWriterBuilderTests {
 			fail("Incorrect exception was thrown both mapping types are used" +
 					e.getMessage());
 		}
+	}
+
+	private List<Map<String, Object>> buildMapItems() {
+		List<Map<String, Object>> items = new ArrayList<>(3);
+
+		Map<String, Object> item = new HashMap<>(3);
+		item.put("first", 1);
+		item.put("second", "two");
+		item.put("third", "three");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 4);
+		item.put("second", "five");
+		item.put("third", "six");
+		items.add(item);
+
+		item = new HashMap<>(3);
+		item.put("first", 7);
+		item.put("second", "eight");
+		item.put("third", "nine");
+		items.add(item);
+		return items;
 	}
 
 	private void verifyRow(int i, String i1, String nine) {
