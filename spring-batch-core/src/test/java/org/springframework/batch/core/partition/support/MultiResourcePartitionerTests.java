@@ -15,18 +15,19 @@
  */
 package org.springframework.batch.core.partition.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MultiResourcePartitionerTests {
 
@@ -35,7 +36,7 @@ public class MultiResourcePartitionerTests {
 	@Before
 	public void setUp() {
 		ResourceArrayPropertyEditor editor = new ResourceArrayPropertyEditor();
-		editor.setAsText("classpath:baseContext.xml");
+		editor.setAsText("classpath:jsrBaseContext.xml");
 		partitioner.setResources((Resource[]) editor.getValue());
 	}
 
