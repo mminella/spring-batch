@@ -86,7 +86,6 @@ public class JsrJobOperatorTests extends AbstractJsrTestCase {
 
 	@Before
 	public void setup() throws Exception {
-//		resetBaseContext();
 
 		MockitoAnnotations.initMocks(this);
 		parameterConverter = new JobParametersConverterSupport();
@@ -171,17 +170,6 @@ public class JsrJobOperatorTests extends AbstractJsrTestCase {
 
 		System.getProperties().remove("JSR-352-BASE-CONTEXT");
 	}
-//
-//	private void resetBaseContext() throws NoSuchFieldException, IllegalAccessException {
-//		Field instancesField = ContextSingletonBeanFactoryLocator.class.getDeclaredField("instances");
-//		instancesField.setAccessible(true);
-//
-//		Field instancesModifiers = Field.class.getDeclaredField("modifiers");
-//		instancesModifiers.setAccessible(true);
-//		instancesModifiers.setInt(instancesField, instancesField.getModifiers() & ~Modifier.FINAL);
-//
-//		instancesField.set(null, new HashMap());
-//	}
 
 	@Test
 	public void testDefaultTaskExecutor() throws Exception {

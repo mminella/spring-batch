@@ -161,10 +161,6 @@ public class JsrJobOperator implements JobOperator, ApplicationContextAware, Ini
 
 		this.baseContext = BaseContextHolder.getInstance().getContext();
 
-//		BeanFactoryLocator beanFactoryLocactor = ContextSingletonBeanFactoryLocator.getInstance();
-//		BeanFactoryReference ref = beanFactoryLocactor.useBeanFactory("baseContext");
-//		baseContext = (ApplicationContext) ref.getFactory();
-
 		baseContext.getAutowireCapableBeanFactory().autowireBeanProperties(this,
 				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 
@@ -807,6 +803,9 @@ public class JsrJobOperator implements JobOperator, ApplicationContextAware, Ini
 		}
 	}
 
+	/**
+	 * A singleton holder used to lazily bootstrap the base context used in JSR-352.
+	 */
 	protected static class BaseContextHolder {
 
 		private ApplicationContext context;
