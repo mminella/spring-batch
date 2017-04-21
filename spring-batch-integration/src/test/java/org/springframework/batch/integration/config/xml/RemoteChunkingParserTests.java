@@ -15,7 +15,10 @@
  */
 package org.springframework.batch.integration.config.xml;
 
+import java.util.List;
+
 import org.junit.Test;
+
 import org.springframework.batch.core.step.item.ChunkProcessor;
 import org.springframework.batch.core.step.item.SimpleChunkProcessor;
 import org.springframework.batch.integration.chunk.ChunkHandler;
@@ -32,7 +35,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.integration.config.ServiceActivatorFactoryBean;
 import org.springframework.integration.test.util.TestUtils;
 import org.springframework.messaging.MessageChannel;
-import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -47,6 +49,7 @@ import static org.junit.Assert.fail;
  * @author Chris Schaefer
  * @since 3.1
  */
+@SuppressWarnings("unchecked")
 public class RemoteChunkingParserTests {
 	@Test
 	public void testRemoteChunkingSlaveParserWithProcessorDefined() {
