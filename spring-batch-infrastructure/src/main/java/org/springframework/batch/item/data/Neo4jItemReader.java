@@ -28,8 +28,9 @@ import org.neo4j.ogm.session.Session;
  *
  * @author Michael Minella
  */
-public class Neo4jItemReader<T> extends AbstractNeo4jItemReader {
+public class Neo4jItemReader<T> extends AbstractNeo4jItemReader<T> {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Iterator<T> doPageRead() {
 		Session session = getSessionFactory().openSession();

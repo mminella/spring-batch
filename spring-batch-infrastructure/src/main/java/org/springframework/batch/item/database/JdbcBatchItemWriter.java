@@ -158,7 +158,7 @@ public class JdbcBatchItemWriter<T> implements ItemWriter<T>, InitializingBean {
 	/* (non-Javadoc)
 	 * @see org.springframework.batch.item.ItemWriter#write(java.util.List)
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public void write(final List<? extends T> items) throws Exception {
 

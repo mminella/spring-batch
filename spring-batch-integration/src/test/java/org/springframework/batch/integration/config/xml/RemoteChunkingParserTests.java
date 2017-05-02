@@ -51,6 +51,8 @@ import static org.junit.Assert.fail;
  */
 @SuppressWarnings("unchecked")
 public class RemoteChunkingParserTests {
+
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testRemoteChunkingSlaveParserWithProcessorDefined() {
 		ApplicationContext applicationContext =
@@ -83,6 +85,7 @@ public class RemoteChunkingParserTests {
 		assertNotNull("Target object must not be null", targetObject);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testRemoteChunkingSlaveParserWithProcessorNotDefined() {
 		ApplicationContext applicationContext =
@@ -97,6 +100,7 @@ public class RemoteChunkingParserTests {
 		assertTrue("Got wrong instance of ItemProcessor", itemProcessor instanceof PassThroughItemProcessor);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testRemoteChunkingMasterParser() {
 		ApplicationContext applicationContext =
@@ -106,7 +110,7 @@ public class RemoteChunkingParserTests {
 		assertNotNull("Messaging template must not be null", TestUtils.getPropertyValue(itemWriter, "messagingGateway"));
 		assertNotNull("Reply channel must not be null", TestUtils.getPropertyValue(itemWriter, "replyChannel"));
 
-		FactoryBean remoteChunkingHandlerFactoryBean = applicationContext.getBean(RemoteChunkHandlerFactoryBean.class);
+		FactoryBean<ChunkHandler> remoteChunkingHandlerFactoryBean = applicationContext.getBean(RemoteChunkHandlerFactoryBean.class);
 		assertNotNull("Chunk writer must not be null", TestUtils.getPropertyValue(remoteChunkingHandlerFactoryBean, "chunkWriter"));
 		assertNotNull("Step must not be null", TestUtils.getPropertyValue(remoteChunkingHandlerFactoryBean, "step"));
 	}

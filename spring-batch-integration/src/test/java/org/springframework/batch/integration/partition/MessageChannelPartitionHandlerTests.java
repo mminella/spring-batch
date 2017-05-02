@@ -54,7 +54,7 @@ public class MessageChannelPartitionHandlerTests {
 		assertNull(executions);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testHandleNoReply() throws Exception {
 		//execute with no default set
@@ -80,7 +80,7 @@ public class MessageChannelPartitionHandlerTests {
 		assertTrue(executions.isEmpty());
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testHandleWithReplyChannel() throws Exception {
 		//execute with no default set
@@ -109,7 +109,7 @@ public class MessageChannelPartitionHandlerTests {
 
 	}
 
-	@SuppressWarnings("rawtype")
+	@SuppressWarnings("rawtypes")
 	@Test(expected = MessageTimeoutException.class)
 	public void messageReceiveTimeout() throws Exception {
 		//execute with no default set

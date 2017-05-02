@@ -237,6 +237,7 @@ public class ExtendedConnectionDataSourceProxy implements SmartDataSource, Initi
 	 * @param target the original Connection to wrap
 	 * @return the wrapped Connection
 	 */
+	@SuppressWarnings("rawtypes")
 	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
 		return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
 				new Class[] { ConnectionProxy.class }, new CloseSuppressingInvocationHandler(target, this));

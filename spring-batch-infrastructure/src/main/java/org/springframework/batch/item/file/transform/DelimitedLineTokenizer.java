@@ -80,7 +80,7 @@ public class DelimitedLineTokenizer extends AbstractLineTokenizer
 	 * @param delimiter the desired delimiter.  This is required
 	 */
 	public DelimitedLineTokenizer(String delimiter) {
-		Assert.notNull(delimiter);
+		Assert.notNull(delimiter, "A delimiter is required");
 		Assert.state(!delimiter.equals(String.valueOf(DEFAULT_QUOTE_CHARACTER)), "[" + DEFAULT_QUOTE_CHARACTER
 				+ "] is not allowed as delimiter for tokenizers.");
 
