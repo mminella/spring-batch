@@ -149,6 +149,7 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 	}
 
 	public PartitionStepBuilder jobExplorer(JobExplorer jobExplorer) {
+		System.out.println(">> I called the jobexplorer with : " + jobExplorer);
 		this.jobExplorer = jobExplorer;
 		return this;
 	}
@@ -166,6 +167,7 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 	}
 
 	public Step build() {
+		System.out.println(">> this.jobExplorer = " + this.jobExplorer);
 		PartitionStep step = new PartitionStep();
 		step.setName(getName());
 		super.enhance(step);
@@ -188,6 +190,7 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 			step.setStepExecutionSplitter(splitter);
 		}
 		else {
+			System.out.println(">> this.jobExplorer 2 = " + this.jobExplorer);
 
 			boolean allowStartIfComplete = isAllowStartIfComplete();
 			String name = stepName;
@@ -201,6 +204,8 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 							+ "Using default from enclosing PartitionStep (" + name + "," + allowStartIfComplete + ").");
 				}
 			}
+			System.out.println(">> this.jobExplorer 3 = " + this.jobExplorer);
+
 			SimpleStepExecutionSplitter splitter = new SimpleStepExecutionSplitter();
 			splitter.setPartitioner(partitioner);
 			splitter.setJobRepository(getJobRepository());

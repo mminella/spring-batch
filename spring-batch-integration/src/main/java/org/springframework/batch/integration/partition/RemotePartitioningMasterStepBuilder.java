@@ -128,6 +128,7 @@ public class RemotePartitioningMasterStepBuilder extends PartitionStepBuilder {
 	public RemotePartitioningMasterStepBuilder jobExplorer(JobExplorer jobExplorer) {
 		Assert.notNull(jobExplorer, "jobExplorer must not be null");
 		this.jobExplorer = jobExplorer;
+		super.jobExplorer(jobExplorer);
 		return this;
 	}
 

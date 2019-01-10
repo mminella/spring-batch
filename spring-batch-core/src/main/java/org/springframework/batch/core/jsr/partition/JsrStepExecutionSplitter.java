@@ -15,18 +15,22 @@
  */
 package org.springframework.batch.core.jsr.partition;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.jsr.launch.JsrJobOperator;
 import org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ExecutionContext;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Provides JSR-352 specific behavior for the splitting of {@link StepExecution}s.
@@ -39,12 +43,14 @@ public class JsrStepExecutionSplitter extends SimpleStepExecutionSplitter {
 	private String stepName;
 	private JobRepository jobRepository;
 	private boolean restoreState;
+	private JobExplorer jobExplorer;
 
-	public JsrStepExecutionSplitter(JobRepository jobRepository, boolean allowStartIfComplete, String stepName, boolean restoreState) {
+	public JsrStepExecutionSplitter(JobRepository jobRepository, boolean allowStartIfComplete, String stepName, boolean restoreState, JobExplorer jobExplorer) {
 		super(jobRepository, allowStartIfComplete, stepName, null, null);
 		this.stepName = stepName;
 		this.jobRepository = jobRepository;
 		this.restoreState = restoreState;
+		this.jobExplorer = jobExplorer;
 	}
 
 	@Override
@@ -78,16 +84,25 @@ public class JsrStepExecutionSplitter extends SimpleStepExecutionSplitter {
 				return r1.compareTo(r2);
 			}
 		});
+
 		JobExecution jobExecution = stepExecution.getJobExecution();
+		JobInstance jobInstance = stepExecution.getJobExecution().getJobInstance();
+		List<JobExecution> jobExecutions = this.jobExplorer.getJobExecutions(jobInstance);
+
+		Collection<StepExecution> allPriorStepExecutions = new ArrayList<>();
+
+		for (JobExecution execution : jobExecutions) {
+			allPriorStepExecutions.addAll(execution.getStepExecutions());
+		}
 
 		for(int i = 0; i < gridSize; i++) {
 			String stepName = this.stepName + ":partition" + i;
 			JobExecution curJobExecution = new JobExecution(jobExecution);
 			StepExecution curStepExecution = new StepExecution(stepName, curJobExecution);
 
-//			if(!restoreState || isStartable(curStepExecution, new ExecutionContext())) {
-//				executions.add(curStepExecution);
-//			}
+			if(!restoreState || isStartable(curStepExecution, new ExecutionContext(), allPriorStepExecutions)) {
+				executions.add(curStepExecution);
+			}
 		}
 
 		jobRepository.addAll(executions);

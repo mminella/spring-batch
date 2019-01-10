@@ -5,7 +5,7 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
 	   xmlns:task="http://www.springframework.org/schema/task"
-	   xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+	   xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
 
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
@@ -59,7 +59,7 @@
 
 	<job id="job1" xmlns="http://www.springframework.org/schema/batch">
 		<step id="step1-master">
-			<partition handler="partitionHandler" partitioner="partitioner" />
+			<partition handler="partitionHandler" partitioner="partitioner" job-explorer="jobExplorer"/>
 		</step>
 	</job>
 

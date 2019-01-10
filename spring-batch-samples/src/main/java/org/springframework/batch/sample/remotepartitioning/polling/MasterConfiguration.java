@@ -21,6 +21,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningMasterStepBuilderFactory;
 import org.springframework.batch.sample.remotepartitioning.BasicPartitioner;
@@ -52,7 +53,6 @@ public class MasterConfiguration {
 
 	private final RemotePartitioningMasterStepBuilderFactory masterStepBuilderFactory;
 
-
 	public MasterConfiguration(JobBuilderFactory jobBuilderFactory,
 							   RemotePartitioningMasterStepBuilderFactory masterStepBuilderFactory) {
 
@@ -80,9 +80,11 @@ public class MasterConfiguration {
 	 * Configure the master step
 	 */
 	@Bean
-	public Step masterStep() {
+	public Step masterStep(JobExplorer jobExplorer) {
+		System.out.println(">> injected JobExplorer = " + jobExplorer);
 		return this.masterStepBuilderFactory.get("masterStep")
 				.partitioner("workerStep", new BasicPartitioner())
+				.jobExplorer(jobExplorer)
 				.gridSize(GRID_SIZE)
 				.outputChannel(requests())
 				.build();
@@ -91,7 +93,7 @@ public class MasterConfiguration {
 	@Bean
 	public Job remotePartitioningJob() {
 		return this.jobBuilderFactory.get("remotePartitioningJob")
-				.start(masterStep())
+				.start(masterStep(null))
 				.build();
 	}
 

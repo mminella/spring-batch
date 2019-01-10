@@ -15,16 +15,18 @@
  */
 package org.springframework.batch.core.jsr.partition;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.step.JobRepositorySupport;
+import org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean;
+import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
+
+import static org.junit.Assert.assertEquals;
 
 public class JsrStepExecutionSplitterTests {
 
@@ -32,7 +34,10 @@ public class JsrStepExecutionSplitterTests {
 
 	@Before
 	public void setUp() throws Exception {
-		splitter = new JsrStepExecutionSplitter(new JobRepositorySupport(), false, "step1", true);
+		MapJobRepositoryFactoryBean mapJobRepositoryFactoryBean = new MapJobRepositoryFactoryBean();
+		MapJobExplorerFactoryBean mapJobExplorerFactoryBean = new MapJobExplorerFactoryBean(mapJobRepositoryFactoryBean);
+
+		splitter = new JsrStepExecutionSplitter(mapJobRepositoryFactoryBean.getObject(), false, "step1", true, mapJobExplorerFactoryBean.getObject());
 	}
 
 	@Test

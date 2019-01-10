@@ -15,8 +15,14 @@
  */
 package org.springframework.batch.core.job.flow;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -25,6 +31,8 @@ import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean;
 import org.springframework.batch.core.job.flow.support.DefaultStateTransitionComparator;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.job.flow.support.StateTransition;
@@ -35,17 +43,12 @@ import org.springframework.batch.core.job.flow.support.state.SplitState;
 import org.springframework.batch.core.job.flow.support.state.StepState;
 import org.springframework.batch.core.jsr.configuration.support.BatchPropertyContext;
 import org.springframework.batch.core.jsr.partition.JsrPartitionHandler;
-import org.springframework.batch.core.jsr.step.PartitionStep;
 import org.springframework.batch.core.jsr.partition.JsrStepExecutionSplitter;
+import org.springframework.batch.core.jsr.step.PartitionStep;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.core.step.StepSupport;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,6 +68,8 @@ public class FlowJobTests {
 
 	private JobRepository jobRepository;
 
+	private JobExplorer jobExplorer;
+
 	private boolean fail = false;
 
 	private JobExecutionDao jobExecutionDao;
@@ -72,9 +77,11 @@ public class FlowJobTests {
 	@Before
 	public void setUp() throws Exception {
 		MapJobRepositoryFactoryBean factory = new MapJobRepositoryFactoryBean();
+		MapJobExplorerFactoryBean jobExplorerFactoryBean = new MapJobExplorerFactoryBean(factory);
 		factory.afterPropertiesSet();
 		jobExecutionDao = factory.getJobExecutionDao();
 		jobRepository = factory.getObject();
+		this.jobExplorer = jobExplorerFactoryBean.getObject();
 		job.setJobRepository(jobRepository);
 		jobExecution = jobRepository.createJobExecution("job", new JobParameters());
 	}
@@ -565,10 +572,11 @@ public class FlowJobTests {
 		partitionHandler.setPropertyContext(new BatchPropertyContext());
 		partitionHandler.setPartitions(3);
 		partitionHandler.setJobRepository(jobRepository);
+		partitionHandler.setJobExplorer(jobExplorer);
 		partitionHandler.setStep(new StubStep("subStep"));
 		partitionHandler.afterPropertiesSet();
 		step.setPartitionHandler(partitionHandler);
-		step.setStepExecutionSplitter(new JsrStepExecutionSplitter(jobRepository, false, "step1", true));
+		step.setStepExecutionSplitter(new JsrStepExecutionSplitter(jobRepository, false, "step1", true, this.jobExplorer));
 		step.setJobRepository(jobRepository);
 		step.afterPropertiesSet();
 		transitions.add(StateTransition.createStateTransition(new StepState("job.step", step), "end0"));

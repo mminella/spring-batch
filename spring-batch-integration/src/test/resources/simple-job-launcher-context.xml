@@ -13,6 +13,10 @@
 		<property name="transactionManager" ref="transactionManager"/>
 	</bean>
 
+	<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean">
+		<constructor-arg ref="&amp;jobRepository"/>
+	</bean>
+
 	<bean id="simpleJob" class="org.springframework.batch.core.job.SimpleJob" abstract="true">
 		<property name="jobRepository" ref="jobRepository" />
 		<property name="restartable" value="true" />

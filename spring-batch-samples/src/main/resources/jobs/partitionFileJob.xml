@@ -6,7 +6,7 @@
 
 	<job id="partitionJob" xmlns="http://www.springframework.org/schema/batch">
 		<step id="step">
-			<partition step="step1" partitioner="partitioner">
+			<partition step="step1" partitioner="partitioner" job-explorer="jobExplorer">
 				<handler grid-size="2" task-executor="taskExecutor" />
 			</partition>
 		</step>

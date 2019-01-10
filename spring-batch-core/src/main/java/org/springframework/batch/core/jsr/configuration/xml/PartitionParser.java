@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.w3c.dom.Element;
+
 import org.springframework.batch.core.jsr.configuration.support.BatchArtifactType;
 import org.springframework.batch.core.jsr.partition.JsrPartitionHandler;
 import org.springframework.beans.MutablePropertyValues;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * Parser for the &lt;partition&gt; element as defined by JSR-352.
@@ -81,6 +82,7 @@ public class PartitionParser {
 		MutablePropertyValues properties = partitionHandlerDefinition.getPropertyValues();
 		properties.addPropertyValue(PARTITION_CONTEXT_PROPERTY, new RuntimeBeanReference("batchPropertyContext"));
 		properties.addPropertyValue("jobRepository", new RuntimeBeanReference("jobRepository"));
+		properties.addPropertyValue("jobExplorer", new RuntimeBeanReference("jobExplorer"));
 		properties.addPropertyValue("allowStartIfComplete", allowStartIfComplete);
 
 		parseMapperElement(element, parserContext, properties);

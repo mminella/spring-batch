@@ -40,6 +40,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.jsr.configuration.support.BatchPropertyContext;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.StepExecutionSplitter;
@@ -73,6 +74,7 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 	private int threads;
 	private BatchPropertyContext propertyContext;
 	private JobRepository jobRepository;
+	private JobExplorer jobExplorer;
 	private boolean allowStartIfComplete = false;
 	private Set<String> partitionStepNames = new HashSet<>();
 	private int pollingInterval = DEFAULT_POLLING_INTERVAL;
@@ -158,6 +160,10 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 	 */
 	public void setJobRepository(JobRepository jobRepository) {
 		this.jobRepository = jobRepository;
+	}
+
+	public void setJobExplorer(JobExplorer jobExplorer) {
+		this.jobExplorer = jobExplorer;
 	}
 
 	/**
@@ -289,7 +295,7 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 				}
 
 			} else {
-				StepExecutionSplitter stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), true);
+				StepExecutionSplitter stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), true, this.jobExplorer);
 				partitionStepExecutions = stepSplitter.split(stepExecution, partitions);
 			}
 		} else {
@@ -297,7 +303,7 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 				PartitionPlan plan = mapper.mapPartitions();
 				partitionStepExecutions = applyPartitionPlan(stepExecution, plan, true);
 			} else {
-				StepExecutionSplitter stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), true);
+				StepExecutionSplitter stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), true, this.jobExplorer);
 				partitionStepExecutions = stepSplitter.split(stepExecution, partitions);
 			}
 		}
@@ -321,7 +327,7 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 
 		stepExecution.getExecutionContext().put("partitionPlanState", partitionPlanState);
 
-		stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), restoreState);
+		stepSplitter = new JsrStepExecutionSplitter(jobRepository, allowStartIfComplete, stepExecution.getStepName(), restoreState, this.jobExplorer);
 		partitionStepExecutions = stepSplitter.split(stepExecution, plan.getPartitions());
 		registerPartitionProperties(partitionStepExecutions, plan);
 		return partitionStepExecutions;
@@ -398,6 +404,7 @@ public class JsrPartitionHandler implements PartitionHandler, InitializingBean {
 		Assert.notNull(propertyContext, "A BatchPropertyContext is required");
 		Assert.isTrue(mapper != null || (threads > 0 || partitions > 0), "Either a mapper implementation or the number of partitions/threads is required");
 		Assert.notNull(jobRepository, "A JobRepository is required");
+		Assert.notNull(jobExplorer, "A JobExplorer is required");
 		Assert.isTrue(pollingInterval >= 0, "The polling interval must be positive");
 
 		if(partitionDataQueue == null) {

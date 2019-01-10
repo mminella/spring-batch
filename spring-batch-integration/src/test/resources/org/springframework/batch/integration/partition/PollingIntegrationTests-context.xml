@@ -40,7 +40,7 @@
 
 	<job id="job1" xmlns="http://www.springframework.org/schema/batch">
 		<step id="step1-master">
-			<partition handler="partitionHandler" partitioner="partitioner" />
+			<partition handler="partitionHandler" partitioner="partitioner" job-explorer="jobExplorer"/>
 		</step>
 	</job>
 
