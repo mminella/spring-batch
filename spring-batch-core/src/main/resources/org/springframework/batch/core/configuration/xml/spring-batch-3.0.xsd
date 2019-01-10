@@ -577,6 +577,18 @@
 				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="job-explorer">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+								JobExplorer for determining restart state.]]>
+				</xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.batch.core.explore.JobExplorer" />
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="taskletType">

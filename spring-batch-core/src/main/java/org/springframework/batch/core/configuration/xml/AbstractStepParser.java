@@ -86,6 +86,8 @@ public abstract class AbstractStepParser {
 
 	private static final String JOB_REPO_ATTR = "job-repository";
 
+	private static final String JOB_EXPLORER_ATTR = "job-explorer";
+
 	private static final StepListenerParser stepListenerParser = new StepListenerParser(StepListenerMetaData.stepExecutionListenerMetaData());
 
 	/**
@@ -202,6 +204,7 @@ public abstract class AbstractStepParser {
 		String partitionerRef = partitionElement.getAttribute(PARTITIONER_ATTR);
 		String aggregatorRef = partitionElement.getAttribute(AGGREGATOR_ATTR);
 		String handlerRef = partitionElement.getAttribute(HANDLER_ATTR);
+		String jobExplorerRef = partitionElement.getAttribute(JOB_EXPLORER_ATTR);
 
 		if (!StringUtils.hasText(partitionerRef)) {
 			parserContext.getReaderContext().error("You must specify a partitioner", partitionElement);
@@ -211,6 +214,8 @@ public abstract class AbstractStepParser {
 		MutablePropertyValues propertyValues = bd.getPropertyValues();
 
 		propertyValues.addPropertyValue("partitioner", new RuntimeBeanReference(partitionerRef));
+		propertyValues.addPropertyValue("jobExplorer", new RuntimeBeanReference(jobExplorerRef));
+
 		if (StringUtils.hasText(aggregatorRef)) {
 			propertyValues.addPropertyValue("stepExecutionAggregator", new RuntimeBeanReference(aggregatorRef));			
 		}

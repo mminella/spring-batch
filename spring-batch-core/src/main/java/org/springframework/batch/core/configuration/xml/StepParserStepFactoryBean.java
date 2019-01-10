@@ -42,6 +42,7 @@ import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.StepListener;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.jsr.ChunkListenerAdapter;
 import org.springframework.batch.core.jsr.ItemProcessListenerAdapter;
@@ -162,6 +163,8 @@ public class StepParserStepFactoryBean<I, O> implements FactoryBean<Step>, BeanN
 	private Queue<Serializable> partitionQueue;
 
 	private ReentrantLock partitionLock;
+
+	private JobExplorer jobExplorer;
 
 	//
 	// Tasklet Elements
@@ -338,6 +341,7 @@ public class StepParserStepFactoryBean<I, O> implements FactoryBean<Step>, BeanN
 		}
 
 		builder.aggregator(stepExecutionAggregator);
+		builder.jobExplorer(jobExplorer);
 
 		return builder.build();
 
@@ -730,6 +734,10 @@ public class StepParserStepFactoryBean<I, O> implements FactoryBean<Step>, BeanN
 	 */
 	public void setStep(Step step) {
 		this.step = step;
+	}
+
+	public void setJobExplorer(JobExplorer jobExplorer) {
+		this.jobExplorer = jobExplorer;
 	}
 
 	// =========================================================

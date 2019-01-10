@@ -16,12 +16,8 @@
 
 package org.springframework.batch.core.partition.support;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -29,6 +25,7 @@ import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.partition.StepExecutionSplitter;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ExecutionContext;
@@ -61,6 +58,8 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 
 	private JobRepository jobRepository;
 
+	private JobExplorer jobExplorer;
+
 	/**
 	 * Default constructor for convenience in configuration.
 	 */
@@ -77,11 +76,12 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 	 * @param partitioner a {@link Partitioner} to use for generating input
 	 * parameters
 	 */
-	public SimpleStepExecutionSplitter(JobRepository jobRepository, boolean allowStartIfComplete, String stepName, Partitioner partitioner) {
+	public SimpleStepExecutionSplitter(JobRepository jobRepository, boolean allowStartIfComplete, String stepName, Partitioner partitioner, JobExplorer jobExplorer) {
 		this.jobRepository = jobRepository;
 		this.allowStartIfComplete = allowStartIfComplete;
 		this.partitioner = partitioner;
 		this.stepName = stepName;
+		this.jobExplorer = jobExplorer;
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 	 * @param partitioner a {@link Partitioner} to use for generating input
 	 * parameters
 	 *
-	 * @deprecated use {@link #SimpleStepExecutionSplitter(JobRepository, boolean, String, Partitioner)} instead
+	 * @deprecated use {@link #SimpleStepExecutionSplitter(JobRepository, boolean, String, Partitioner, JobExplorer)} instead
 	 */
 	@Deprecated
 	public SimpleStepExecutionSplitter(JobRepository jobRepository, Step step, Partitioner partitioner) {
@@ -114,6 +114,7 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 		Assert.state(jobRepository != null, "A JobRepository is required");
 		Assert.state(stepName != null, "A step name is required");
 		Assert.state(partitioner != null, "A Partitioner is required");
+		Assert.state(jobExplorer != null, "A JobExplorer is required");
 	}
 
 	/**
@@ -159,6 +160,10 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 		this.stepName = stepName;
 	}
 
+	public void setJobExplorer(JobExplorer jobExplorer) {
+		this.jobExplorer = jobExplorer;
+	}
+
 	/**
 	 * @see StepExecutionSplitter#getStepName()
 	 */
@@ -178,6 +183,16 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 		Map<String, ExecutionContext> contexts = getContexts(stepExecution, gridSize);
 		Set<StepExecution> set = new HashSet<>(contexts.size());
 
+		JobInstance jobInstance = stepExecution.getJobExecution().getJobInstance();
+		System.out.println(jobInstance);
+		List<JobExecution> jobExecutions = this.jobExplorer.getJobExecutions(jobInstance);
+
+		Collection<StepExecution> allPriorStepExecutions = new ArrayList<>();
+
+		for (JobExecution execution : jobExecutions) {
+			allPriorStepExecutions.addAll(execution.getStepExecutions());
+		}
+
 		for (Entry<String, ExecutionContext> context : contexts.entrySet()) {
 
 			// Make the step execution name unique and repeatable
@@ -185,7 +200,7 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 
 			StepExecution currentStepExecution = jobExecution.createStepExecution(stepName);
 
-			boolean startable = isStartable(currentStepExecution, context.getValue());
+			boolean startable = isStartable(currentStepExecution, context.getValue(), allPriorStepExecutions);
 
 			if (startable) {
 				set.add(currentStepExecution);
@@ -246,8 +261,8 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 	 * @return true if the step execution is startable, false otherwise
 	 * @throws JobExecutionException if unable to check if the step execution is startable
 	 */
-	protected boolean isStartable(StepExecution stepExecution, ExecutionContext context) throws JobExecutionException {
-		return getStartable(stepExecution, context);
+	protected boolean isStartable(StepExecution stepExecution, ExecutionContext context, Collection<StepExecution> previousStepExecutions) throws JobExecutionException {
+		return getStartable(stepExecution, context, previousStepExecutions);
 	}
 
 	/**
@@ -261,11 +276,10 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 	 * future version.
 	 */
 	@Deprecated
-	protected boolean getStartable(StepExecution stepExecution, ExecutionContext context) throws JobExecutionException {
+	protected boolean getStartable(StepExecution stepExecution, ExecutionContext context, Collection<StepExecution> previousStepExecutions) throws JobExecutionException {
 
-		JobInstance jobInstance = stepExecution.getJobExecution().getJobInstance();
 		String stepName = stepExecution.getStepName();
-		StepExecution lastStepExecution = jobRepository.getLastStepExecution(jobInstance, stepName);
+		StepExecution lastStepExecution = jobRepository.getLastStepExecution(previousStepExecutions, stepName);
 
 		boolean isRestart = (lastStepExecution != null && lastStepExecution.getStatus() != BatchStatus.COMPLETED);
 
@@ -277,7 +291,6 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 		}
 
 		return shouldStart(allowStartIfComplete, stepExecution, lastStepExecution) || isRestart;
-
 	}
 
 	private boolean shouldStart(boolean allowStartIfComplete, StepExecution stepExecution, StepExecution lastStepExecution)

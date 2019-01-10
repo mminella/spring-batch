@@ -106,4 +106,10 @@ public class DummyJobRepository implements JobRepository, BeanNameAware {
 			JobParameters jobParameters, String jobConfigurationLocation) {
 		return null;
 	}
+
+	@Override
+	public StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName) {
+		return null;
+	}
+
 }

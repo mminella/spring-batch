@@ -88,6 +88,38 @@ public class SimpleJobRepository implements JobRepository {
 	}
 
 	@Override
+	public StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName) {
+
+		List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
+
+		for (StepExecution stepExecution : allStepExecutions) {
+			if (stepName.equals(stepExecution.getStepName())) {
+				stepExecutions.add(stepExecution);
+			}
+		}
+
+		StepExecution latest = null;
+		for (StepExecution stepExecution : stepExecutions) {
+			if (latest == null) {
+				latest = stepExecution;
+			}
+			if (latest.getStartTime().getTime() < stepExecution.getStartTime().getTime()) {
+				latest = stepExecution;
+			}
+		}
+
+		if (latest != null) {
+			ExecutionContext stepExecutionContext = ecDao.getExecutionContext(latest);
+			latest.setExecutionContext(stepExecutionContext);
+			ExecutionContext jobExecutionContext = ecDao.getExecutionContext(latest.getJobExecution());
+			latest.getJobExecution().setExecutionContext(jobExecutionContext);
+		}
+
+		return latest;
+	}
+
+
+	@Override
 	public boolean isJobInstanceExists(String jobName, JobParameters jobParameters) {
 		return jobInstanceDao.getJobInstance(jobName, jobParameters) != null;
 	}

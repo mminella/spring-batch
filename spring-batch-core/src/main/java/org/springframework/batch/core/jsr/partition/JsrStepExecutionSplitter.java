@@ -23,6 +23,7 @@ import org.springframework.batch.core.partition.support.SimpleStepExecutionSplit
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ExecutionContext;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,7 +41,7 @@ public class JsrStepExecutionSplitter extends SimpleStepExecutionSplitter {
 	private boolean restoreState;
 
 	public JsrStepExecutionSplitter(JobRepository jobRepository, boolean allowStartIfComplete, String stepName, boolean restoreState) {
-		super(jobRepository, allowStartIfComplete, stepName, null);
+		super(jobRepository, allowStartIfComplete, stepName, null, null);
 		this.stepName = stepName;
 		this.jobRepository = jobRepository;
 		this.restoreState = restoreState;
@@ -84,9 +85,9 @@ public class JsrStepExecutionSplitter extends SimpleStepExecutionSplitter {
 			JobExecution curJobExecution = new JobExecution(jobExecution);
 			StepExecution curStepExecution = new StepExecution(stepName, curJobExecution);
 
-			if(!restoreState || isStartable(curStepExecution, new ExecutionContext())) {
-				executions.add(curStepExecution);
-			}
+//			if(!restoreState || isStartable(curStepExecution, new ExecutionContext())) {
+//				executions.add(curStepExecution);
+//			}
 		}
 
 		jobRepository.addAll(executions);

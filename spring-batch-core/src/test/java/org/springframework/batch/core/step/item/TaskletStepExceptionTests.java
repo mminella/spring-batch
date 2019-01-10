@@ -572,6 +572,11 @@ public class TaskletStepExceptionTests {
 				JobParameters jobParameters, String jobConfigurationLocation) {
 			return null;
 		}
+
+		@Override
+		public StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName) {
+			return null;
+		}
 	}
 	
 	@SuppressWarnings("serial")

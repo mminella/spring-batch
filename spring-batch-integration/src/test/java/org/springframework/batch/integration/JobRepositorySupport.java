@@ -109,4 +109,9 @@ public class JobRepositorySupport implements JobRepository {
             JobParameters jobParameters, String jobConfigurationLocation) {
         return null;
     }
+
+	@Override
+	public StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName) {
+		return null;
+	}
 }

@@ -16,6 +16,7 @@
 package org.springframework.batch.core.step.builder;
 
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.StepExecutionSplitter;
 import org.springframework.batch.core.partition.support.PartitionStep;
@@ -55,6 +56,8 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 	private StepExecutionAggregator aggregator;
 
 	private String stepName;
+
+	private JobExplorer jobExplorer;
 
 	/**
 	 * Create a new builder initialized with any properties in the parent. The parent is copied, so it can be re-used.
@@ -145,6 +148,11 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 		return this;
 	}
 
+	public PartitionStepBuilder jobExplorer(JobExplorer jobExplorer) {
+		this.jobExplorer = jobExplorer;
+		return this;
+	}
+
 	/**
 	 * Provide a step execution aggregator for aggregating partitioned step executions into a single result for the
 	 * {@link PartitionStep} itself.  Default is a simple implementation that works in most cases.
@@ -198,6 +206,7 @@ public class PartitionStepBuilder extends StepBuilderHelper<PartitionStepBuilder
 			splitter.setJobRepository(getJobRepository());
 			splitter.setAllowStartIfComplete(allowStartIfComplete);
 			splitter.setStepName(name);
+			splitter.setJobExplorer(jobExplorer);
 			this.splitter = splitter;
 			step.setStepExecutionSplitter(splitter);
 
