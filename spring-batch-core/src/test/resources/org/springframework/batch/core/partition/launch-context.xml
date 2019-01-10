@@ -27,6 +27,7 @@
 					<bean
 						class="org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter">
 						<property name="jobRepository" ref="jobRepository" />
+						<property name="jobExplorer" ref="jobExplorer"/>
 						<property name="stepName" value="step1" />
 						<property name="partitioner">
 							<bean
@@ -70,10 +71,16 @@
 		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
 		<property name="jobRepository" ref="jobRepository" />
 	</bean>
+
 	<bean id="jobRepository"
 		class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
 		p:databaseType="hsql" p:dataSource-ref="dataSource"
 		p:transactionManager-ref="transactionManager" />
+
+	<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
 
 	<bean class="org.springframework.batch.core.scope.StepScope" />
 
