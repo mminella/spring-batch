@@ -106,5 +106,4 @@ public class DummyJobRepository implements JobRepository, BeanNameAware {
 			JobParameters jobParameters, String jobConfigurationLocation) {
 		return null;
 	}
-
 }

@@ -16,8 +16,14 @@
 
 package org.springframework.batch.core.partition.support;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -184,7 +190,6 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 		Set<StepExecution> set = new HashSet<>(contexts.size());
 
 		JobInstance jobInstance = stepExecution.getJobExecution().getJobInstance();
-		System.out.println(jobInstance);
 		List<JobExecution> jobExecutions = this.jobExplorer.getJobExecutions(jobInstance);
 
 		Collection<StepExecution> allPriorStepExecutions = new ArrayList<>();
