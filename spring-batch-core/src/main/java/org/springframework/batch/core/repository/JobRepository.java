@@ -48,9 +48,6 @@ import java.util.Collection;
  */
 public interface JobRepository {
 
-	@Nullable
-	StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName);
-
 	/**
 	 * Check if an instance of this job already exists with the parameters
 	 * provided.

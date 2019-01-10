@@ -107,9 +107,4 @@ public class DummyJobRepository implements JobRepository, BeanNameAware {
 		return null;
 	}
 
-	@Override
-	public StepExecution getLastStepExecution(Collection<StepExecution> allStepExecutions, String stepName) {
-		return null;
-	}
-
 }

@@ -279,7 +279,24 @@ public class SimpleStepExecutionSplitter implements StepExecutionSplitter, Initi
 	protected boolean getStartable(StepExecution stepExecution, ExecutionContext context, Collection<StepExecution> previousStepExecutions) throws JobExecutionException {
 
 		String stepName = stepExecution.getStepName();
-		StepExecution lastStepExecution = jobRepository.getLastStepExecution(previousStepExecutions, stepName);
+
+		List<StepExecution> stepExecutions = new ArrayList<>();
+
+		for (StepExecution curStepExecution : previousStepExecutions) {
+			if (stepName.equals(curStepExecution.getStepName())) {
+				stepExecutions.add(curStepExecution);
+			}
+		}
+
+		StepExecution lastStepExecution = null;
+		for (StepExecution curStepExecution : stepExecutions) {
+			if (lastStepExecution == null) {
+				lastStepExecution = curStepExecution;
+			}
+			if (lastStepExecution.getStartTime().getTime() < curStepExecution.getStartTime().getTime()) {
+				lastStepExecution = curStepExecution;
+			}
+		}
 
 		boolean isRestart = (lastStepExecution != null && lastStepExecution.getStatus() != BatchStatus.COMPLETED);
 
