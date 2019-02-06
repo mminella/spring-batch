@@ -15,6 +15,9 @@
  */
 package org.springframework.batch.core.configuration.annotation;
 
+import java.util.Collection;
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -23,17 +26,17 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.JobScope;
 import org.springframework.batch.core.scope.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportAware;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
-
-import javax.sql.DataSource;
-import java.util.Collection;
 
 /**
  * Base {@code Configuration} class providing common structure for enabling and using Spring Batch. Customization is
@@ -47,12 +50,14 @@ import java.util.Collection;
  */
 @Configuration
 @Import(ScopeConfiguration.class)
-public abstract class AbstractBatchConfiguration implements ImportAware {
+public abstract class AbstractBatchConfiguration implements ImportAware, ApplicationContextAware {
 
 	@Autowired(required = false)
 	private DataSource dataSource;
 
 	private BatchConfigurer configurer;
+
+	private GenericApplicationContext applicationContext;
 
 	@Bean
 	public JobBuilderFactory jobBuilders() throws Exception {
@@ -78,7 +83,15 @@ public abstract class AbstractBatchConfiguration implements ImportAware {
 		return new MapJobRegistry();
 	}
 
-	@Bean
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = (GenericApplicationContext) applicationContext;
+	}
+
+//	protected void setTransactionManager(PlatformTransactionManager transactionManager) {
+//		this.transactionManager = transactionManager;
+//	}
+
+//	@Bean
 	public abstract PlatformTransactionManager transactionManager() throws Exception;
 
 	@Override
@@ -90,17 +103,20 @@ public abstract class AbstractBatchConfiguration implements ImportAware {
 	}
 
 	protected BatchConfigurer getConfigurer(Collection<BatchConfigurer> configurers) throws Exception {
+		System.out.println(">> We got the configurer");
 		if (this.configurer != null) {
 			return this.configurer;
 		}
 		if (configurers == null || configurers.isEmpty()) {
 			if (dataSource == null) {
 				DefaultBatchConfigurer configurer = new DefaultBatchConfigurer();
+				configurer.setApplicationContext(this.applicationContext);
 				configurer.initialize();
 				this.configurer = configurer;
 				return configurer;
 			} else {
 				DefaultBatchConfigurer configurer = new DefaultBatchConfigurer(dataSource);
+				configurer.setApplicationContext(this.applicationContext);
 				configurer.initialize();
 				this.configurer = configurer;
 				return configurer;

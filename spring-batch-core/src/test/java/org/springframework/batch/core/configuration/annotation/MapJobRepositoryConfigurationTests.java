@@ -15,11 +15,10 @@
  */
 package org.springframework.batch.core.configuration.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -42,6 +41,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.stereotype.Component;
 
+import static org.junit.Assert.assertEquals;
+
 public class MapJobRepositoryConfigurationTests {
 
 	JobLauncher jobLauncher;
@@ -51,6 +52,7 @@ public class MapJobRepositoryConfigurationTests {
 
 	@Test
 	public void testRoseyScenario() throws Exception {
+		System.out.println(">> about to run test");
 		testConfigurationClass(MapRepositoryBatchConfiguration.class);
 	}
 

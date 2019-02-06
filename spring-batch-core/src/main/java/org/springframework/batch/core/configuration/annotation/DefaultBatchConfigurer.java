@@ -31,13 +31,17 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
-public class DefaultBatchConfigurer implements BatchConfigurer {
+public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationContextAware {
 	private static final Log logger = LogFactory.getLog(DefaultBatchConfigurer.class);
 
 	private DataSource dataSource;
@@ -45,6 +49,7 @@ public class DefaultBatchConfigurer implements BatchConfigurer {
 	private JobRepository jobRepository;
 	private JobLauncher jobLauncher;
 	private JobExplorer jobExplorer;
+	private GenericApplicationContext applicationContext;
 
 	/**
 	 * Sets the dataSource.  If the {@link DataSource} has been set once, all future
@@ -55,14 +60,15 @@ public class DefaultBatchConfigurer implements BatchConfigurer {
 	 */
 	@Autowired(required = false)
 	public void setDataSource(DataSource dataSource) {
+		System.out.println(">> setDataSource was called");
 		if(this.dataSource == null) {
 			this.dataSource = dataSource;
 		}
 
-		if(getTransactionManager() == null) {
-			logger.warn("No transaction manager was provided, using a DataSourceTransactionManager");
-			this.transactionManager = new DataSourceTransactionManager(this.dataSource);
-		}
+//		if(getTransactionManager() == null) {
+//			logger.warn("No transaction manager was provided, using a DataSourceTransactionManager");
+//			this.transactionManager = new DataSourceTransactionManager(this.dataSource);
+//		}
 	}
 
 	protected DefaultBatchConfigurer() {}
@@ -93,13 +99,17 @@ public class DefaultBatchConfigurer implements BatchConfigurer {
 
 	@PostConstruct
 	public void initialize() {
+		System.out.println(">> defaultBatchConfigurer.intialize was called");
 		try {
 			if(dataSource == null) {
 				logger.warn("No datasource was provided...using a Map based JobRepository");
 
 				if(getTransactionManager() == null) {
 					logger.warn("No transaction manager was provided, using a ResourcelessTransactionManager");
-					this.transactionManager = new ResourcelessTransactionManager();
+					final ResourcelessTransactionManager transactionManager = new ResourcelessTransactionManager();
+					this.transactionManager = transactionManager;
+					this.applicationContext.registerBean(ResourcelessTransactionManager.class,
+							() -> transactionManager);
 				}
 
 				MapJobRepositoryFactoryBean jobRepositoryFactory = new MapJobRepositoryFactoryBean(getTransactionManager());
@@ -128,6 +138,15 @@ public class DefaultBatchConfigurer implements BatchConfigurer {
 	}
 
 	protected JobRepository createJobRepository() throws Exception {
+		System.out.println(">> createJobRepository was called");
+		if(this.dataSource != null) {
+			if(getTransactionManager() == null) {
+				final DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(this.dataSource);
+				this.transactionManager = transactionManager;
+				this.applicationContext.registerBean(DataSourceTransactionManager.class, () -> transactionManager);
+			}
+		}
+
 		JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
 		factory.setDataSource(dataSource);
 		factory.setTransactionManager(getTransactionManager());
@@ -140,5 +159,11 @@ public class DefaultBatchConfigurer implements BatchConfigurer {
 		jobExplorerFactoryBean.setDataSource(this.dataSource);
 		jobExplorerFactoryBean.afterPropertiesSet();
 		return jobExplorerFactoryBean.getObject();
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		System.out.println(">> setApplicationContext was called");
+		this.applicationContext = (GenericApplicationContext) applicationContext;
 	}
 }

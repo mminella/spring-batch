@@ -15,8 +15,11 @@
  */
 package org.springframework.batch.core.configuration.annotation;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.AbstractLazyCreationTargetSource;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -29,8 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base {@code Configuration} class providing common structure for enabling and using Spring Batch. Customization is
@@ -86,7 +87,7 @@ public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
 	}
 
 	@Override
-	@Bean
+//	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {
 		return createLazyProxy(transactionManager, PlatformTransactionManager.class);
 	}
@@ -108,13 +109,14 @@ public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
 	 * @throws Exception if there is a problem in the configurer
 	 */
 	protected void initialize() throws Exception {
+		System.out.println(">> initializing the configuration");
 		if (initialized) {
 			return;
 		}
 		BatchConfigurer configurer = getConfigurer(context.getBeansOfType(BatchConfigurer.class).values());
 		jobRepository.set(configurer.getJobRepository());
 		jobLauncher.set(configurer.getJobLauncher());
-		transactionManager.set(configurer.getTransactionManager());
+		transactionManager.set(this.context.getBean(PlatformTransactionManager.class));
 		jobRegistry.set(new MapJobRegistry());
 		jobExplorer.set(configurer.getJobExplorer());
 		initialized = true;

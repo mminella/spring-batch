@@ -15,6 +15,8 @@
  */
 package org.springframework.batch.core.configuration.annotation;
 
+import java.util.Collection;
+
 import org.springframework.batch.core.configuration.support.ApplicationContextFactory;
 import org.springframework.batch.core.configuration.support.AutomaticJobRegistrar;
 import org.springframework.batch.core.configuration.support.DefaultJobLoader;
@@ -26,8 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.Collection;
 
 /**
  * Base {@code Configuration} class providing common structure for enabling and using Spring Batch. Customization is
@@ -61,7 +61,7 @@ public class ModularBatchConfiguration extends AbstractBatchConfiguration {
 	}
 
 	@Override
-	@Bean
+//	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {
 		return getConfigurer(configurers).getTransactionManager();
 	}

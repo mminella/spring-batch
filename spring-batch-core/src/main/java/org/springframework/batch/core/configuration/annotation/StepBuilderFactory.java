@@ -33,6 +33,7 @@ public class StepBuilderFactory {
 	private PlatformTransactionManager transactionManager;
 
 	public StepBuilderFactory(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+		System.out.println(">> stepBuilderFactory was created");
 		this.jobRepository = jobRepository;
 		this.transactionManager = transactionManager;
 	}
