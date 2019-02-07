@@ -61,11 +61,13 @@ public abstract class AbstractBatchConfiguration implements ImportAware, Applica
 
 	@Bean
 	public JobBuilderFactory jobBuilders() throws Exception {
+		System.out.println(">> AbstractBatchConfiguration#jobBuilders was called");
 		return new JobBuilderFactory(jobRepository());
 	}
 
 	@Bean
 	public StepBuilderFactory stepBuilders() throws Exception {
+		System.out.println(">> AbstractBatchConfiguration#stepBuilders was called");
 		return new StepBuilderFactory(jobRepository(), transactionManager());
 	}
 
@@ -80,10 +82,12 @@ public abstract class AbstractBatchConfiguration implements ImportAware, Applica
 
 	@Bean
 	public JobRegistry jobRegistry() throws Exception {
+		System.out.println(">> AbstractBatchConfiguration#jobRegistry was called");
 		return new MapJobRegistry();
 	}
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
+		System.out.println(">> AbstractBatchConfiguration#setApplicationContext was called");
 		this.applicationContext = (GenericApplicationContext) applicationContext;
 	}
 
@@ -96,6 +100,7 @@ public abstract class AbstractBatchConfiguration implements ImportAware, Applica
 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
+		System.out.println(">> AbstractBatchConfiguration#setImportMetadata was called");
 		AnnotationAttributes enabled = AnnotationAttributes.fromMap(importMetadata.getAnnotationAttributes(
 				EnableBatchProcessing.class.getName(), false));
 		Assert.notNull(enabled,

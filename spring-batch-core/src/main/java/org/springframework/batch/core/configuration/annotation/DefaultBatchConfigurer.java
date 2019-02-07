@@ -15,12 +15,17 @@
  */
 package org.springframework.batch.core.configuration.annotation;
 
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.AbstractLazyCreationTargetSource;
 import org.springframework.batch.core.configuration.BatchConfigurationException;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
@@ -71,29 +76,35 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 //		}
 	}
 
-	protected DefaultBatchConfigurer() {}
+	protected DefaultBatchConfigurer() {		System.out.println(">> DefaultBatchConfigurer() was called");
+	}
 
 	public DefaultBatchConfigurer(DataSource dataSource) {
+		System.out.println(">> DefaultBatchConfigurer(DataSource) was called");
 		setDataSource(dataSource);
 	}
 
 	@Override
 	public JobRepository getJobRepository() {
+		System.out.println(">> DefaultBatchConfigurer#getJobRepository was called");
 		return jobRepository;
 	}
 
 	@Override
 	public PlatformTransactionManager getTransactionManager() {
+		System.out.println(">> DefaultBatchConfigurer#getTransactionManager was called");
 		return transactionManager;
 	}
 
 	@Override
 	public JobLauncher getJobLauncher() {
+		System.out.println(">> DefaultBatchConfigurer#getJobLauncher was called");
 		return jobLauncher;
 	}
 
 	@Override
 	public JobExplorer getJobExplorer() {
+		System.out.println(">> DefaultBatchConfigurer#getJobExplorer was called");
 		return jobExplorer;
 	}
 
@@ -108,7 +119,7 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 					logger.warn("No transaction manager was provided, using a ResourcelessTransactionManager");
 					final ResourcelessTransactionManager transactionManager = new ResourcelessTransactionManager();
 					this.transactionManager = transactionManager;
-					this.applicationContext.registerBean(ResourcelessTransactionManager.class,
+					this.applicationContext.registerBean("transactionManager", ResourcelessTransactionManager.class,
 							() -> transactionManager);
 				}
 
@@ -131,6 +142,7 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 	}
 
 	protected JobLauncher createJobLauncher() throws Exception {
+		System.out.println(">> DefaultBatchConfigurer#createJobLauncher was called");
 		SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
 		jobLauncher.setJobRepository(jobRepository);
 		jobLauncher.afterPropertiesSet();
@@ -143,7 +155,7 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 			if(getTransactionManager() == null) {
 				final DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(this.dataSource);
 				this.transactionManager = transactionManager;
-				this.applicationContext.registerBean(DataSourceTransactionManager.class, () -> transactionManager);
+				this.applicationContext.registerBean("transactionManager", DataSourceTransactionManager.class, () -> transactionManager);
 			}
 		}
 
@@ -155,6 +167,7 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 	}
 
 	protected JobExplorer createJobExplorer() throws Exception {
+		System.out.println(">> DefaultBatchConfigurer#createJobExplorer was called");
 		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
 		jobExplorerFactoryBean.setDataSource(this.dataSource);
 		jobExplorerFactoryBean.afterPropertiesSet();
@@ -166,4 +179,39 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 		System.out.println(">> setApplicationContext was called");
 		this.applicationContext = (GenericApplicationContext) applicationContext;
 	}
+
+	private <T> T createLazyProxy(AtomicReference<T> reference, Class<T> type) {
+		ProxyFactory factory = new ProxyFactory();
+		factory.setTargetSource(new ReferenceTargetSource<>(reference));
+		factory.addAdvice(new PassthruAdvice());
+		factory.setInterfaces(new Class<?>[] { type });
+		@SuppressWarnings("unchecked")
+		T proxy = (T) factory.getProxy();
+		return proxy;
+	}
+
+	private class PassthruAdvice implements MethodInterceptor {
+
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			return invocation.proceed();
+		}
+
+	}
+
+	private class ReferenceTargetSource<T> extends AbstractLazyCreationTargetSource {
+
+		private AtomicReference<T> reference;
+
+		public ReferenceTargetSource(AtomicReference<T> reference) {
+			this.reference = reference;
+		}
+
+		@Override
+		protected Object createObject() throws Exception {
+			initialize();
+			return reference.get();
+		}
+	}
+
 }

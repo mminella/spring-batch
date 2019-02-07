@@ -38,7 +38,11 @@ public class TransactionManagerConfigurationWithoutBatchConfigurerTests extends 
 
 	@Test
 	public void testConfigurationWithNoDataSourceAndNoTransactionManager() throws Exception {
+		System.out.println(">> TEST TO BEGIN!");
 		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(BatchConfigurationWithNoDataSourceAndNoTransactionManager.class);
+		System.out.println(">> CONTEXT IS CREATED!");
+		Object jobRepository = AopTestUtils.getTargetObject(applicationContext.getBean("jobRepository"));
+		System.out.println(">> JOB REPOSITORY BEAN HAS BEEN FETCHED");
 		Assert.assertTrue(applicationContext.containsBean("transactionManager"));
 		PlatformTransactionManager platformTransactionManager = applicationContext.getBean(PlatformTransactionManager.class);
 		Object targetObject = AopTestUtils.getTargetObject(platformTransactionManager);
@@ -59,6 +63,7 @@ public class TransactionManagerConfigurationWithoutBatchConfigurerTests extends 
 	@Test
 	public void testConfigurationWithDataSourceAndNoTransactionManager() throws Exception {
 		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(BatchConfigurationWithDataSourceAndNoTransactionManager.class);
+		Object jobRepository = AopTestUtils.getTargetObject(applicationContext.getBean("jobRepository"));
 		Assert.assertTrue(applicationContext.containsBean("transactionManager"));
 		PlatformTransactionManager platformTransactionManager = applicationContext.getBean(PlatformTransactionManager.class);
 		Object targetObject = AopTestUtils.getTargetObject(platformTransactionManager);

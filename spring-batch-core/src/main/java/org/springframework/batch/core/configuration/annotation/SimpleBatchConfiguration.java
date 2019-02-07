@@ -65,34 +65,40 @@ public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
 	@Override
 	@Bean
 	public JobRepository jobRepository() throws Exception {
+		System.out.println(">> Creating JobRepository Bean");
 		return createLazyProxy(jobRepository, JobRepository.class);
 	}
 
 	@Override
 	@Bean
 	public JobLauncher jobLauncher() throws Exception {
+		System.out.println(">> Creating JobLauncher Bean");
 		return createLazyProxy(jobLauncher, JobLauncher.class);
 	}
 
 	@Override
 	@Bean
 	public JobRegistry jobRegistry() throws Exception {
+		System.out.println(">> Creating jobRegistry Bean");
 		return createLazyProxy(jobRegistry, JobRegistry.class);
 	}
 
 	@Override
 	@Bean
 	public JobExplorer jobExplorer() {
+		System.out.println(">> Creating JobExplorer Bean");
 		return createLazyProxy(jobExplorer, JobExplorer.class);
 	}
 
 	@Override
 //	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {
+		System.out.println(">> SimpleBatchConfiguration#transactionManager was called");
 		return createLazyProxy(transactionManager, PlatformTransactionManager.class);
 	}
 
 	private <T> T createLazyProxy(AtomicReference<T> reference, Class<T> type) {
+		System.out.println(">> SimpleBatchConfiguration#createLazyProxy was called");
 		ProxyFactory factory = new ProxyFactory();
 		factory.setTargetSource(new ReferenceTargetSource<>(reference));
 		factory.addAdvice(new PassthruAdvice());
