@@ -19,6 +19,7 @@ import java.util.Collection;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.BatchTransactionManagerBeanFactoryPostProcessor;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -58,6 +59,11 @@ public abstract class AbstractBatchConfiguration implements ImportAware, Applica
 	private BatchConfigurer configurer;
 
 	private GenericApplicationContext applicationContext;
+
+	@Bean
+	public BatchTransactionManagerBeanFactoryPostProcessor batchTransactionManagerBeanFactoryPostProcessor() {
+		return new BatchTransactionManagerBeanFactoryPostProcessor();
+	}
 
 	@Bean
 	public JobBuilderFactory jobBuilders() throws Exception {

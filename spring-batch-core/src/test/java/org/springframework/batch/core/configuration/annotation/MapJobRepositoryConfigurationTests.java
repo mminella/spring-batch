@@ -32,8 +32,11 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -138,12 +141,14 @@ public class MapJobRepositoryConfigurationTests {
 
 	@Component
 	@EnableBatchProcessing
-	public static class MapRepositoryBatchConfiguration {
+	public static class MapRepositoryBatchConfiguration implements ApplicationContextAware {
 		@Autowired
 		JobBuilderFactory jobFactory;
 
 		@Autowired
 		StepBuilderFactory stepFactory;
+
+		private ApplicationContext context;
 
 		@Bean
 		Step step1 () {
@@ -158,6 +163,11 @@ public class MapJobRepositoryConfigurationTests {
 		@Bean
 		Job job() {
 			return jobFactory.get("job").start(step1()).build();
+		}
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.context = applicationContext;
 		}
 	}
 }

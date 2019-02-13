@@ -18,9 +18,9 @@ package org.springframework.batch.core.configuration.annotation;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,13 +35,11 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
-import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -71,9 +69,19 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 		}
 
 //		if(getTransactionManager() == null) {
+//			final DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(this.dataSource);
+//			this.transactionManager = transactionManager;
+//			this.applicationContext.registerBean("transactionManager", DataSourceTransactionManager.class, () -> transactionManager);
+//		}
+//		if(getTransactionManager() == null) {
 //			logger.warn("No transaction manager was provided, using a DataSourceTransactionManager");
 //			this.transactionManager = new DataSourceTransactionManager(this.dataSource);
 //		}
+	}
+
+	@Autowired
+	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 
 	protected DefaultBatchConfigurer() {		System.out.println(">> DefaultBatchConfigurer() was called");
@@ -115,13 +123,13 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 			if(dataSource == null) {
 				logger.warn("No datasource was provided...using a Map based JobRepository");
 
-				if(getTransactionManager() == null) {
-					logger.warn("No transaction manager was provided, using a ResourcelessTransactionManager");
-					final ResourcelessTransactionManager transactionManager = new ResourcelessTransactionManager();
-					this.transactionManager = transactionManager;
-					this.applicationContext.registerBean("transactionManager", ResourcelessTransactionManager.class,
-							() -> transactionManager);
-				}
+//				if(getTransactionManager() == null) {
+//					logger.warn("No transaction manager was provided, using a ResourcelessTransactionManager");
+//					final ResourcelessTransactionManager transactionManager = new ResourcelessTransactionManager();
+//					this.transactionManager = transactionManager;
+//					this.applicationContext.registerBean("transactionManager", ResourcelessTransactionManager.class,
+//							() -> transactionManager);
+//				}
 
 				MapJobRepositoryFactoryBean jobRepositoryFactory = new MapJobRepositoryFactoryBean(getTransactionManager());
 				jobRepositoryFactory.afterPropertiesSet();
@@ -151,13 +159,13 @@ public class DefaultBatchConfigurer implements BatchConfigurer, ApplicationConte
 
 	protected JobRepository createJobRepository() throws Exception {
 		System.out.println(">> createJobRepository was called");
-		if(this.dataSource != null) {
-			if(getTransactionManager() == null) {
-				final DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(this.dataSource);
-				this.transactionManager = transactionManager;
-				this.applicationContext.registerBean("transactionManager", DataSourceTransactionManager.class, () -> transactionManager);
-			}
-		}
+//		if(this.dataSource != null) {
+//			if(getTransactionManager() == null) {
+//				final DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(this.dataSource);
+//				this.transactionManager = transactionManager;
+//				this.applicationContext.registerBean("transactionManager", DataSourceTransactionManager.class, () -> transactionManager);
+//			}
+//		}
 
 		JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
 		factory.setDataSource(dataSource);

@@ -168,6 +168,7 @@ public class JsrJobOperator implements JobOperator, ApplicationContextAware, Ini
 		if(taskExecutor == null) {
 			taskExecutor = new SimpleAsyncTaskExecutor();
 		}
+		System.out.println(">> transactionManager = " + this.transactionManager);
 	}
 
 	/**
